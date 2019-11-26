@@ -37,6 +37,13 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- Folio client dependencies -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.10</version>
+    </dependency>
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.apache.drill.exec</groupId>

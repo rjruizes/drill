@@ -1,0 +1,168 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug (Launch) - Current File",
+      "request": "launch",
+      "mainClass": "${file}"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-BuildTimeScan<drill-common>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.common.scanner.BuildTimeScan",
+      "projectName": "drill-common"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-TableIndexCmd<drill-format-mapr>",
+      "request": "launch",
+      "mainClass": "com.mapr.drill.maprdb.tests.index.TableIndexCmd",
+      "projectName": "drill-format-mapr"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-ParquetSchemaMerge<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.ParquetSchemaMerge",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-RunRootExec<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.RunRootExec",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-SortTest<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.SortTest",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-TestMemoryRetention<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.TestMemoryRetention",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-DumpCat<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.client.DumpCat",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-QuerySubmitter<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.client.QuerySubmitter",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-ReplaceMethodInvoke<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.compile.bytecode.ReplaceMethodInvoke",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-EscapeTest1<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.expr.EscapeTest1",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-GenerateTestData<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.physical.impl.window.GenerateTestData",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-StoragePlugins<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.planner.logical.StoragePlugins",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-Drillbit<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.server.Drillbit",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-ClassPathFileSystem<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.store.ClassPathFileSystem",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-ParquetSimpleTestFileGenerator<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.store.parquet.ParquetSimpleTestFileGenerator",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-ConcatPcap<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.store.pcap.ConcatPcap",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-TestPcapDecoder<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.store.pcap.TestPcapDecoder",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-FileTest<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.exec.work.batch.FileTest",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-PerformanceTool<drill-java-exec>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.test.rowSet.test.PerformanceTool",
+      "projectName": "drill-java-exec"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-JdbcDataTest<drill-jdbc>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.jdbc.test.JdbcDataTest",
+      "projectName": "drill-jdbc"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-DrillApplicationMaster<drill-yarn>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.yarn.appMaster.DrillApplicationMaster",
+      "projectName": "drill-yarn"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-DrillOnYarn<drill-yarn>",
+      "request": "launch",
+      "mainClass": "org.apache.drill.yarn.client.DrillOnYarn",
+      "projectName": "drill-yarn"
+    }
+  ]
+}
