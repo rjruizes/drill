@@ -14,13 +14,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 public class Login {
-  public static String login(String okapiUrl, String tenant) throws ClientProtocolException, IOException {
+  public static String login(String okapiUrl, String tenant, String user, String pass) throws ClientProtocolException, IOException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     
     HttpPost httppost = new HttpPost(okapiUrl + "/authn/login");
     String inputJson = "{\n" +
-    "  \"username\": \"diku_admin\",\n" +
-    "  \"password\": \"\"\n" +
+    "  \"username\": \""+user+"\",\n" +
+    "  \"password\": \""+pass+"\"\n" +
     "}";
 
     StringEntity stringEntity = new StringEntity(inputJson);
