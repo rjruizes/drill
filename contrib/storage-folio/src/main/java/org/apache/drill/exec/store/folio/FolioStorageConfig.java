@@ -12,16 +12,19 @@ public class FolioStorageConfig extends StoragePluginConfig {
   public static final String NAME = "folio";
 
   private final String url;
+  private final String tenant;
   private final String username;
   private final String password;
 
   @JsonCreator
   public FolioStorageConfig(
       @JsonProperty("url") String url,
+      @JsonProperty("tenant") String tenant,
       @JsonProperty("username") String username,
       @JsonProperty("password") String password) {
     super();
     this.url = url;
+    this.tenant = tenant;
     this.username = username;
     this.password = password;
   }
@@ -74,6 +77,10 @@ public class FolioStorageConfig extends StoragePluginConfig {
 
   public String getUrl() {
     return url;
+  }
+
+  public String getTenant() {
+    return tenant;
   }
 
   public String getUsername() {

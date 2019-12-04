@@ -29,7 +29,7 @@ public class FolioStoragePlugin extends AbstractStoragePlugin {
     super(context, name);
     this.config = config;
     this.schemaFactory = new FolioSchemaFactory(this, name);
-    this.client = new FolioClient();
+    this.client = new FolioClient(config.getUrl(), config.getTenant(), config.getUsername(), config.getPassword());
     System.out.println("Start folio plugin");
   }
 
