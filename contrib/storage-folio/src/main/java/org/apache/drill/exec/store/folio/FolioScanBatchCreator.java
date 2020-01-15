@@ -47,7 +47,7 @@ public class FolioScanBatchCreator implements BatchCreator<FolioSubScan>{
         if ((columns = subScan.getColumns())==null) {
           columns = GroupScan.ALL_COLUMNS;
         }
-        readers.add(new FolioRecordReader(/*subScan.getStorageEngine().getClient(),*/ scanSpec, columns));
+        readers.add(new FolioRecordReader(subScan.getStorageEngine().getClient(), scanSpec, columns));
       } catch (Exception e1) {
         throw new ExecutionSetupException(e1);
       }

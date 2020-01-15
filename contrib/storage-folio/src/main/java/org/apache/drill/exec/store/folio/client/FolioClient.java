@@ -1,9 +1,10 @@
 package org.apache.drill.exec.store.folio.client;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.drill.exec.store.folio.client.Login;
-
+import org.apache.drill.exec.store.folio.raml.ApiField;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -20,7 +21,8 @@ public class FolioClient {
     private String tenant;
     private String token;
 
-    public FolioClient(String okapiUrl, String tenant, String user, String pass) throws ClientProtocolException, IOException {
+    public FolioClient(String okapiUrl, String tenant, String user, String pass)
+            throws ClientProtocolException, IOException {
         this.httpclient = HttpClients.createDefault();
         this.okapiUrl = okapiUrl;
         this.tenant = tenant;
@@ -45,12 +47,8 @@ public class FolioClient {
     }
 
     private HttpUriRequest authenticatedRequest(String method, String path) {
-        return RequestBuilder.create(method)
-            .setUri(okapiUrl + path)
-            .setHeader("Accept", "application/json")
-            .setHeader("X-Okapi-Tenant", tenant)
-            .setHeader("X-Okapi-Token", token)
-            .build();
+        return RequestBuilder.create(method).setUri(okapiUrl + path).setHeader("Accept", "application/json")
+                .setHeader("X-Okapi-Tenant", tenant).setHeader("X-Okapi-Token", token).build();
     }
 
     public String get(String path) throws ClientProtocolException, IOException {
@@ -63,9 +61,18 @@ public class FolioClient {
         return httpclient.execute(request, responseHandler());
     }
 
+    public ArrayList<ApiField> getSchema(String path) throws Exception {
+        if(path.equals("locations")) {
+            return Raml.readSchemaFromRaml("ramls/location.raml", "location");
+        }
+        return null;
+    }
+
     // public final static void main(String[] args) throws Exception {
     //     FolioClient fc = new FolioClient();
     //     System.out.println(fc.get("/inventory/instances?limit=30&query=%28holdingsRecords.permanentLocationId%3D%22fcd64ce1-6995-48f0-840e-89ffa2288371%22%29%20sortby%20title"));
     // }
 
 }
+
+

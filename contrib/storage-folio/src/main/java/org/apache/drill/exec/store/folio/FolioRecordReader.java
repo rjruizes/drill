@@ -18,11 +18,15 @@
 package org.apache.drill.exec.store.folio;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import com.github.jsonldjava.utils.JsonUtils;
 
 import org.apache.drill.common.exceptions.ExecutionSetupException;
-import org.apache.drill.common.exceptions.UserException;
 import org.apache.drill.common.expression.SchemaPath;
 import org.apache.drill.common.types.TypeProtos.MajorType;
 import org.apache.drill.common.types.TypeProtos.MinorType;
@@ -34,6 +38,9 @@ import org.apache.drill.exec.physical.impl.OutputMutator;
 import org.apache.drill.exec.record.MaterializedField;
 import org.apache.drill.exec.store.AbstractRecordReader;
 import org.apache.drill.exec.store.folio.FolioSubScan.FolioSubScanSpec;
+import org.apache.drill.exec.store.folio.client.FolioClient;
+import org.apache.drill.exec.store.folio.client.FolioScanner;
+import org.apache.drill.exec.store.folio.raml.ApiField;
 import org.apache.drill.exec.vector.BigIntVector;
 import org.apache.drill.exec.vector.BitVector;
 import org.apache.drill.exec.vector.Float4Vector;
@@ -61,24 +68,25 @@ public class FolioRecordReader extends AbstractRecordReader {
 
   private static final int TARGET_RECORD_COUNT = 4000;
 
-  // private final FolioClient client;
+  private final FolioClient client;
   private final FolioSubScanSpec scanSpec;
-  // private FolioScanner scanner;
+  private FolioScanner scanner;
+  private Iterator<Map<String, Object>> iterator;
 
   private OutputMutator output;
   private OperatorContext context;
   private boolean hasBeenRead = false;
 
   private static class ProjectedColumnInfo {
-    int index;
+    String index;
     ValueVector vv;
   }
 
   private ImmutableList<ProjectedColumnInfo> projectedCols;
 
-  public FolioRecordReader(/*FolioClient client,*/ FolioSubScan.FolioSubScanSpec subScanSpec, List<SchemaPath> projectedColumns) {
+  public FolioRecordReader(FolioClient client, FolioSubScan.FolioSubScanSpec subScanSpec, List<SchemaPath> projectedColumns) {
     setColumns(projectedColumns);
-    // this.client = client;
+    this.client = client;
     scanSpec = subScanSpec;
     logger.debug("Scan spec: {}", subScanSpec);
   }
@@ -87,18 +95,20 @@ public class FolioRecordReader extends AbstractRecordReader {
   public void setup(OperatorContext context, OutputMutator output) throws ExecutionSetupException {
     this.output = output;
     this.context = context;
-    // try {
-      // FolioTable table = client.openTable(scanSpec.getTableName());
-
-    //   FolioScannerBuilder builder = client.newScannerBuilder(table);
-    //   if (!isStarQuery()) {
-    //     List<String> colNames = Lists.newArrayList();
-    //     for (SchemaPath p : this.getColumns()) {
-    //       colNames.add(p.getRootSegmentPath());
-    //     }
-    //     builder.setProjectedColumnNames(colNames);
-    //   }
-
+    try {
+      scanner = new FolioScanner(scanSpec.getTableName(), client);
+      
+      // ArrayList<ApiField> fields = client.getSchema(scanSpec.getTableName());
+      System.out.println("tableName: " + scanSpec.getTableName());
+      // FolioScannerBuilder builder = client.newScannerBuilder(table);
+      if(!isStarQuery()) {
+        System.out.println("Is NOT a star query");
+        List<String> colNames = Lists.newArrayList();
+        for (SchemaPath p : this.getColumns()) {
+          colNames.add(p.getRootSegmentPath());
+        }
+        // builder.setProjectedColumnNames(colNames);
+      }
     //   context.getStats().startWait();
     //   try {
     //     scanner = builder
@@ -108,35 +118,46 @@ public class FolioRecordReader extends AbstractRecordReader {
     //   } finally {
     //     context.getStats().stopWait();
     //   }
-    // } catch (Exception e) {
-    //   throw new ExecutionSetupException(e);
-    // }
+    } catch (Exception e) {
+      throw new ExecutionSetupException(e);
+    }
   }
 
   @Override
   public int next() {
     int rowCount = 0;
-    if(hasBeenRead) return 0;
     try {
-      addRowResult(rowCount++);
+      while (iterator == null || !iterator.hasNext()) {
+        if (!scanner.hasMoreRows()) {
+          iterator = null;
+          return 0;
+        }
+        iterator = scanner.nextRows();
+      }
+      for (; rowCount < TARGET_RECORD_COUNT && iterator.hasNext(); rowCount++) {
+        addRowResult(iterator.next(), rowCount);
+      }
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
     for (ProjectedColumnInfo pci : projectedCols) {
       pci.vv.getMutator().setValueCount(rowCount);
     }
-    hasBeenRead = true;
-    return 1; // rowCount
+    return rowCount;
   }
 
-  private void initCols() throws SchemaChangeException {
+  private void initCols(Map<String, Object> record) throws SchemaChangeException {
     ImmutableList.Builder<ProjectedColumnInfo> pciBuilder = ImmutableList.builder();
 
-    int numCols = 2;
-    for (int i = 0; i < numCols; i++) {
+    for (Map.Entry<String, Object> entry : record.entrySet()) {
 
-      final String name = "col"+i;
+      final String name = entry.getKey();
+      final Object val = entry.getValue();
       MinorType minorType = MinorType.VARCHAR;
+      if(val instanceof String) {
+        minorType = MinorType.VARCHAR;
+      }
+      
       MajorType majorType = Types.optional(minorType);
       MaterializedField field = MaterializedField.create(name, majorType);
       final Class<? extends ValueVector> clazz = TypeHelper.getValueVectorClass(
@@ -146,7 +167,7 @@ public class FolioRecordReader extends AbstractRecordReader {
 
       ProjectedColumnInfo pci = new ProjectedColumnInfo();
       pci.vv = vector;
-      pci.index = i;
+      pci.index = name;
       System.out.println(name);
       pciBuilder.add(pci);
     }
@@ -154,13 +175,13 @@ public class FolioRecordReader extends AbstractRecordReader {
     projectedCols = pciBuilder.build();
   }
 
-  private void addRowResult(int rowIndex) throws SchemaChangeException {
+  private void addRowResult(Map<String, Object> record, int rowIndex) throws SchemaChangeException {
     if (projectedCols == null) {
-      initCols();
+      initCols(record);
     }
 
     for (ProjectedColumnInfo pci : projectedCols) {
-      ByteBuffer value = ByteBuffer.wrap("val".getBytes());
+      ByteBuffer value = ByteBuffer.wrap(record.get(pci.index).toString().getBytes());
       
       ((NullableVarCharVector.Mutator) pci.vv.getMutator())
         .setSafe(rowIndex, value, 0, value.remaining());

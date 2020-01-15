@@ -17,7 +17,7 @@ public class Login {
   public static String login(String okapiUrl, String tenant, String user, String pass) throws ClientProtocolException, IOException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     
-    HttpPost httppost = new HttpPost(okapiUrl + "/authn/login");
+    HttpPost httppost = new HttpPost(okapiUrl + "/bl-users/login");
     String inputJson = "{\n" +
     "  \"username\": \""+user+"\",\n" +
     "  \"password\": \""+pass+"\"\n" +

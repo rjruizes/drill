@@ -17,6 +17,7 @@
  */
 package org.apache.drill.exec.store.folio.schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.calcite.rel.type.RelDataType;
@@ -24,6 +25,7 @@ import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.drill.exec.planner.logical.DynamicDrillTable;
 import org.apache.drill.exec.store.folio.FolioStoragePlugin;
+import org.apache.drill.exec.store.folio.raml.ApiField;
 import org.apache.drill.exec.store.folio.FolioScanSpec;
 // import org.apache.kudu.ColumnSchema;
 // import org.apache.kudu.Schema;
@@ -34,11 +36,11 @@ import org.apache.drill.shaded.guava.com.google.common.collect.Lists;
 public class DrillFolioTable extends DynamicDrillTable {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DrillFolioTable.class);
 
-  // private final Schema schema;
+  private final ArrayList<ApiField> fields;
 
-  public DrillFolioTable(String storageEngineName, FolioStoragePlugin plugin, FolioScanSpec scanSpec) {
+  public DrillFolioTable(String storageEngineName, FolioStoragePlugin plugin, ArrayList<ApiField> fields, FolioScanSpec scanSpec) {
     super(plugin, storageEngineName, scanSpec);
-    // this.schema = schema;
+    this.fields = fields;
   }
 
   @Override
@@ -46,25 +48,35 @@ public class DrillFolioTable extends DynamicDrillTable {
 
     List<String> names = Lists.newArrayList();
     List<RelDataType> types = Lists.newArrayList();
-    // for (ColumnSchema column : schema.getColumns()) {
-    //   names.add(column.getName());
-    //   RelDataType type = getSqlTypeFromFolioType(typeFactory, column.getType());
-    //   type = typeFactory.createTypeWithNullability(type, column.isNullable());
-    //   types.add(type);
-    // }
-    types.add(getSqlTypeFromFolioType(typeFactory));
-    names.add("col0");
-    types.add(getSqlTypeFromFolioType(typeFactory));
-    names.add("col1");
+    for (ApiField field : fields) {
+      names.add(field.getName());
+      RelDataType type = getSqlTypeFromFolioType(typeFactory, field);
+      type = typeFactory.createTypeWithNullability(type, type.isNullable());
+      types.add(type);
+    }
 
     return typeFactory.createStructType(types, names);
   }
 
-  private RelDataType getSqlTypeFromFolioType(RelDataTypeFactory typeFactory) { // , Type type
-    return typeFactory.createSqlType(SqlTypeName.VARCHAR);
-    // switch (type) {
-    // case BOOL:
-    //   return typeFactory.createSqlType(SqlTypeName.BOOLEAN);
+  private RelDataType getSqlTypeFromFolioType(RelDataTypeFactory typeFactory, ApiField field) {
+    switch (field.getType()) {
+    case "boolean":
+      return typeFactory.createSqlType(SqlTypeName.BOOLEAN);
+    case "object":
+      ArrayList<RelDataType> types = new ArrayList<RelDataType>();
+      ArrayList<String> names = new ArrayList<String>();
+      for(ApiField f : field.getChildren()) {
+        RelDataType dt = getSqlTypeFromFolioType(typeFactory, f);
+        String name = f.getName();
+        types.add(dt);
+        names.add(name);
+      }
+      if(types.size() == 0) {
+        return typeFactory.createUnknownType();
+      }
+      return typeFactory.createStructType(types, names);
+    case "array":
+      return typeFactory.createArrayType(getSqlTypeFromFolioType(typeFactory, field.getChildren().get(0)), -1);
     // case DOUBLE:
     //   return typeFactory.createSqlType(SqlTypeName.DOUBLE);
     // case FLOAT:
@@ -74,14 +86,14 @@ public class DrillFolioTable extends DynamicDrillTable {
     // case INT64:
     // case INT8:
     //   return typeFactory.createSqlType(SqlTypeName.INTEGER);
-    // case STRING:
-    //   return typeFactory.createSqlType(SqlTypeName.VARCHAR);
+    case "string":
+      return typeFactory.createSqlType(SqlTypeName.VARCHAR);
     // case UNIXTIME_MICROS:
     //   return typeFactory.createSqlType(SqlTypeName.TIMESTAMP);
     // case BINARY:
     //   return typeFactory.createSqlType(SqlTypeName.VARBINARY, Integer.MAX_VALUE);
-    // default:
-    //   throw new UnsupportedOperationException("Unsupported type.");
-    // }
+    default:
+      throw new UnsupportedOperationException("Unsupported type.");
+    }
   }
 }

@@ -1,5 +1,6 @@
 package org.apache.drill.exec.store.folio.schema;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.apache.drill.exec.planner.logical.DynamicDrillTable;
 import org.apache.drill.exec.store.AbstractSchema;
 import org.apache.drill.exec.store.folio.FolioScanSpec;
 import org.apache.drill.exec.store.folio.FolioStoragePlugin;
+import org.apache.drill.exec.store.folio.raml.ApiField;
 import org.apache.drill.exec.store.folio.FolioStorageConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +49,8 @@ public class FolioSchema extends AbstractSchema {
   public Table getTable(String name) {
     FolioScanSpec scanSpec = new FolioScanSpec(name);
     try {
-      // FolioTable table = plugin.getClient().openTable(name);
-      // Schema schema = table.getSchema();
-      return new DrillFolioTable(getName(), plugin, scanSpec);
+      ArrayList<ApiField> fields = plugin.getClient().getSchema(scanSpec.getTableName());
+      return new DrillFolioTable(getName(), plugin, fields, scanSpec);
     } catch (Exception e) {
       logger.warn("Failure while retrieving folio table {}", name, e);
       return null;
@@ -68,7 +69,7 @@ public class FolioSchema extends AbstractSchema {
     //   }
     // }
     // return tableNames;
-    Set<String> set = new HashSet<>(Arrays.asList("example", "example2"));
+    Set<String> set = new HashSet<>(Arrays.asList("locations", "example2"));
     return set;
   }
 
