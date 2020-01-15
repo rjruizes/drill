@@ -42,7 +42,7 @@ public interface ColumnWriter {
 
   /**
    * Whether this writer allows nulls. This is not as simple as checking
-   * for the {@link org.apache.drill.common.types.DataMode#OPTIONAL} type in the schema. List entries
+   * for the {@link org.apache.drill.common.types.TypeProtos.DataMode#OPTIONAL} type in the schema. List entries
    * are nullable, if they are primitive, but not if they are maps or lists.
    * Unions are nullable, regardless of cardinality.
    *
@@ -78,6 +78,15 @@ public interface ColumnWriter {
    */
 
   void setNull();
+
+  /**
+   * Copy a single value from the given reader, which must be of the
+   * same type as this writer.
+   *
+   * @param from reader to provide the data
+   */
+
+  void copy(ColumnReader from);
 
   /**
    * Generic technique to write data as a generic Java object. The

@@ -32,6 +32,8 @@ import org.apache.drill.exec.record.VectorWrapper;
 import org.apache.drill.exec.record.WritableBatch;
 import org.apache.drill.exec.record.selection.SelectionVector2;
 import org.apache.drill.exec.record.selection.SelectionVector4;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Modular implementation of the standard Drill record batch iterator
@@ -51,7 +53,7 @@ import org.apache.drill.exec.record.selection.SelectionVector4;
  */
 
 public class OperatorRecordBatch implements CloseableRecordBatch {
-  static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OperatorRecordBatch.class);
+  static final Logger logger = LoggerFactory.getLogger(OperatorRecordBatch.class);
 
   private final OperatorDriver driver;
   private final BatchAccessor batchAccessor;
@@ -96,14 +98,14 @@ public class OperatorRecordBatch implements CloseableRecordBatch {
   }
 
   @Override
-  public BatchSchema getSchema() { return batchAccessor.getSchema(); }
+  public BatchSchema getSchema() { return batchAccessor.schema(); }
 
   @Override
-  public int getRecordCount() { return batchAccessor.getRowCount(); }
+  public int getRecordCount() { return batchAccessor.rowCount(); }
 
   @Override
   public VectorContainer getOutgoingContainer() {
-    return batchAccessor.getOutgoingContainer();
+    return batchAccessor.container();
   }
 
   @Override
@@ -118,17 +120,17 @@ public class OperatorRecordBatch implements CloseableRecordBatch {
 
   @Override
   public WritableBatch getWritableBatch() {
-    return batchAccessor.getWritableBatch();
+    return batchAccessor.writableBatch();
   }
 
   @Override
   public SelectionVector2 getSelectionVector2() {
-    return batchAccessor.getSelectionVector2();
+    return batchAccessor.selectionVector2();
   }
 
   @Override
   public SelectionVector4 getSelectionVector4() {
-    return batchAccessor.getSelectionVector4();
+    return batchAccessor.selectionVector4();
   }
 
   @Override
@@ -163,7 +165,7 @@ public class OperatorRecordBatch implements CloseableRecordBatch {
 
   @Override
   public VectorContainer getContainer() {
-    return batchAccessor.getOutgoingContainer();
+    return batchAccessor.container();
   }
 
   @Override

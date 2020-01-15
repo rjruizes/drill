@@ -20,9 +20,9 @@ package org.apache.drill.exec.compile;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.drill.categories.SlowTest;
+import org.apache.drill.exec.ExecConstants;
 import org.apache.drill.test.BaseTestQuery;
 import org.apache.drill.test.TestTools;
-import org.apache.drill.exec.ExecConstants;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,6 +41,8 @@ public class TestLargeFileCompilation extends BaseTestQuery {
 
   private static final String LARGE_QUERY_FILTER;
 
+  private static final String QUERY_FILTER;
+
   private static final String HUGE_STRING_CONST_QUERY;
 
   private static final String LARGE_QUERY_WRITER;
@@ -51,7 +53,7 @@ public class TestLargeFileCompilation extends BaseTestQuery {
 
   private static final String LARGE_TABLE_WRITER;
 
-  private static final int ITERATION_COUNT = Integer.valueOf(System.getProperty("TestLargeFileCompilation.iteration", "1"));
+  private static final int ITERATION_COUNT = Integer.parseInt(System.getProperty("TestLargeFileCompilation.iteration", "1"));
 
   private static final int NUM_PROJECT_COLUMNS = 2500;
 
@@ -62,6 +64,8 @@ public class TestLargeFileCompilation extends BaseTestQuery {
   private static final int NUM_GROUPBY_COLUMNS = 225;
 
   private static final int NUM_FILTER_COLUMNS = 150;
+
+  private static final int SMALL_NUM_FILTER_COLUMNS = 50;
 
   private static final int NUM_JOIN_TABLE_COLUMNS = 500;
 
@@ -111,6 +115,16 @@ public class TestLargeFileCompilation extends BaseTestQuery {
       sb.append(" employee_id+").append(i).append(" < employee_id ").append(i%2==0?"OR":"AND");
     }
     LARGE_QUERY_FILTER = sb.append(" true") .toString();
+  }
+
+  static {
+    StringBuilder sb = new StringBuilder("select *\n")
+        .append("from cp.`employee.json`\n")
+        .append("where");
+    for (int i = 0; i < SMALL_NUM_FILTER_COLUMNS; i++) {
+      sb.append(" employee_id+").append(i).append(" < employee_id ").append(i % 2 == 0 ? "OR" : "AND");
+    }
+    QUERY_FILTER = sb.append(" true").toString();
   }
 
   static {
@@ -186,6 +200,12 @@ public class TestLargeFileCompilation extends BaseTestQuery {
   }
 
   @Test
+  public void testClassTransformationOOM() throws Exception {
+    testNoResult("alter session set `%s`='JDK'", ClassCompilerSelector.JAVA_COMPILER_OPTION);
+    testNoResult(ITERATION_COUNT, QUERY_FILTER);
+  }
+
+  @Test
   public void testProject() throws Exception {
     testNoResult("alter session set `%s`='JDK'", ClassCompilerSelector.JAVA_COMPILER_OPTION);
     testNoResult(ITERATION_COUNT, LARGE_QUERY_SELECT_LIST);
@@ -203,9 +223,9 @@ public class TestLargeFileCompilation extends BaseTestQuery {
       testNoResult(LARGE_TABLE_WRITER, tableName);
       testNoResult(QUERY_WITH_JOIN, tableName);
     } finally {
-      testNoResult("alter session reset `planner.enable_mergejoin`");
-      testNoResult("alter session reset `planner.enable_nestedloopjoin`");
-      testNoResult("alter session reset `%s`", ClassCompilerSelector.JAVA_COMPILER_OPTION);
+      resetSessionOption("planner.enable_mergejoin");
+      resetSessionOption("planner.enable_nestedloopjoin");
+      resetSessionOption(ClassCompilerSelector.JAVA_COMPILER_OPTION);
       testNoResult("drop table if exists %s", tableName);
     }
   }
@@ -221,9 +241,9 @@ public class TestLargeFileCompilation extends BaseTestQuery {
       testNoResult(LARGE_TABLE_WRITER, tableName);
       testNoResult(QUERY_WITH_JOIN, tableName);
     } finally {
-      testNoResult("alter session reset `planner.enable_hashjoin`");
-      testNoResult("alter session reset `planner.enable_nestedloopjoin`");
-      testNoResult("alter session reset `%s`", ClassCompilerSelector.JAVA_COMPILER_OPTION);
+      resetSessionOption("planner.enable_hashjoin");
+      resetSessionOption("planner.enable_nestedloopjoin");
+      resetSessionOption(ClassCompilerSelector.JAVA_COMPILER_OPTION);
       testNoResult("drop table if exists %s", tableName);
     }
   }
@@ -240,10 +260,10 @@ public class TestLargeFileCompilation extends BaseTestQuery {
       testNoResult(LARGE_TABLE_WRITER, tableName);
       testNoResult(QUERY_WITH_JOIN, tableName);
     } finally {
-      testNoResult("alter session reset `planner.enable_nljoin_for_scalar_only`");
-      testNoResult("alter session reset `planner.enable_hashjoin`");
-      testNoResult("alter session reset `planner.enable_mergejoin`");
-      testNoResult("alter session reset `%s`", ClassCompilerSelector.JAVA_COMPILER_OPTION);
+      resetSessionOption("planner.enable_nljoin_for_scalar_only");
+      resetSessionOption("planner.enable_hashjoin");
+      resetSessionOption("planner.enable_mergejoin");
+      resetSessionOption(ClassCompilerSelector.JAVA_COMPILER_OPTION);
       testNoResult("drop table if exists %s", tableName);
     }
   }

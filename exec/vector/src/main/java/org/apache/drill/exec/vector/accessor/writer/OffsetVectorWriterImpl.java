@@ -19,6 +19,7 @@ package org.apache.drill.exec.vector.accessor.writer;
 
 import org.apache.drill.exec.vector.BaseDataValueVector;
 import org.apache.drill.exec.vector.UInt4Vector;
+import org.apache.drill.exec.vector.accessor.ColumnReader;
 import org.apache.drill.exec.vector.accessor.InvalidConversionError;
 import org.apache.drill.exec.vector.accessor.ValueType;
 import org.apache.drill.exec.vector.accessor.impl.HierarchicalFormatter;
@@ -215,8 +216,8 @@ public class OffsetVectorWriterImpl extends AbstractFixedWidthWriter implements 
     // This is performance critical code; every operation counts.
     // Please be thoughtful when changing the code.
 
-    final int valueIndex = prepareFill();
-    final int fillCount = valueIndex - lastWriteIndex - 1;
+    int valueIndex = prepareFill();
+    int fillCount = valueIndex - lastWriteIndex - 1;
     if (fillCount > 0) {
       fillEmpties(fillCount);
     }
@@ -228,7 +229,7 @@ public class OffsetVectorWriterImpl extends AbstractFixedWidthWriter implements 
   }
 
   public final int prepareFill() {
-    final int valueIndex = vectorIndex.vectorIndex();
+    int valueIndex = vectorIndex.vectorIndex();
     if (valueIndex + 1 < capacity) {
       return valueIndex;
     }
@@ -240,32 +241,32 @@ public class OffsetVectorWriterImpl extends AbstractFixedWidthWriter implements 
   }
 
   @Override
-  protected final void fillEmpties(final int fillCount) {
+  protected final void fillEmpties(int fillCount) {
     for (int i = 0; i < fillCount; i++) {
       fillOffset(nextOffset);
     }
   }
 
   @Override
-  public final void setNextOffset(final int newOffset) {
-    final int writeIndex = prepareWrite();
+  public final void setNextOffset(int newOffset) {
+    int writeIndex = prepareWrite();
     drillBuf.setInt(writeIndex * VALUE_WIDTH, newOffset);
     nextOffset = newOffset;
   }
 
-  public final void reviseOffset(final int newOffset) {
-    final int writeIndex = vectorIndex.vectorIndex() + 1;
+  public final void reviseOffset(int newOffset) {
+    int writeIndex = vectorIndex.vectorIndex() + 1;
     drillBuf.setInt(writeIndex * VALUE_WIDTH, newOffset);
     nextOffset = newOffset;
   }
 
-  public final void fillOffset(final int newOffset) {
+  public final void fillOffset(int newOffset) {
     drillBuf.setInt((++lastWriteIndex + 1) * VALUE_WIDTH, newOffset);
     nextOffset = newOffset;
   }
 
   @Override
-  public final void setValue(final Object value) {
+  public final void setValue(Object value) {
     throw new InvalidConversionError(
         "setValue() not supported for the offset vector writer: " + value);
   }
@@ -298,19 +299,32 @@ public class OffsetVectorWriterImpl extends AbstractFixedWidthWriter implements 
 
   @Override
   public void postRollover() {
-    final int newNext = nextOffset - rowStartOffset;
+    int newNext = nextOffset - rowStartOffset;
     super.postRollover();
     nextOffset = newNext;
   }
 
   @Override
   public void setValueCount(int valueCount) {
-    mandatoryResize(valueCount);
 
-    // Value count is in row positions.
+    if (valueCount == 0) {
 
-    fillEmpties(valueCount - lastWriteIndex - 1);
-    vector().getBuffer().writerIndex((valueCount + 1) * VALUE_WIDTH);
+      // Special case: if the total number of values is zero,
+      // then the offset vector should have 0 (not 1) values.
+      // Serialization code relies on this fact.
+
+      vector().getBuffer().writerIndex(0);
+    } else {
+
+      // Value count is in row positions, not index
+      // positions. (There are one more index positions
+      // than row positions.)
+
+      int offsetCount = valueCount + 1;
+      mandatoryResize(offsetCount);
+      fillEmpties(valueCount - lastWriteIndex - 1);
+      vector().getBuffer().writerIndex(offsetCount * VALUE_WIDTH);
+    }
   }
 
   @Override
@@ -326,5 +340,10 @@ public class OffsetVectorWriterImpl extends AbstractFixedWidthWriter implements 
   @Override
   public void setDefaultValue(Object value) {
     throw new UnsupportedOperationException("Encoding not supported for offset vectors");
+  }
+
+  @Override
+  public void copy(ColumnReader from) {
+    throw new UnsupportedOperationException("Copying of offset vectors not supported");
   }
 }

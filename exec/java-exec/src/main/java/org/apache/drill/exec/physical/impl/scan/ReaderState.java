@@ -21,6 +21,8 @@ import org.apache.drill.common.exceptions.UserException;
 import org.apache.drill.exec.record.VectorContainer;
 import org.apache.drill.exec.vector.accessor.InvalidConversionError;
 import org.apache.drill.exec.vector.accessor.UnsupportedConversionError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages a row batch reader through its lifecycle. Created when the reader
@@ -128,7 +130,7 @@ import org.apache.drill.exec.vector.accessor.UnsupportedConversionError;
  */
 
 class ReaderState {
-  static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ReaderState.class);
+  static final Logger logger = LoggerFactory.getLogger(ReaderState.class);
 
   private enum State {
 
@@ -333,9 +335,9 @@ class ReaderState {
     // in a dummy container.
 
     assert lookahead == null;
-    lookahead = new VectorContainer(scanOp.context.getAllocator(), scanOp.containerAccessor.getSchema());
+    lookahead = new VectorContainer(scanOp.context.getAllocator(), scanOp.containerAccessor.schema());
     lookahead.setRecordCount(0);
-    lookahead.exchange(scanOp.containerAccessor.getOutgoingContainer());
+    lookahead.exchange(scanOp.containerAccessor.container());
     state = state == State.EOF ? State.LOOK_AHEAD_WITH_EOF : State.LOOK_AHEAD;
     return true;
   }
@@ -355,7 +357,7 @@ class ReaderState {
     case LOOK_AHEAD_WITH_EOF:
       // Use batch previously read.
       assert lookahead != null;
-      lookahead.exchange(scanOp.containerAccessor.getOutgoingContainer());
+      lookahead.exchange(scanOp.containerAccessor.container());
       assert lookahead.getRecordCount() == 0;
       lookahead = null;
       if (state == State.LOOK_AHEAD_WITH_EOF) {
