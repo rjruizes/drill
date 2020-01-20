@@ -24,7 +24,7 @@ public class FolioScanner {
   }
 
   public Iterator<Map<String, Object>> nextRows() throws ClientProtocolException, IOException {
-    String resp = client.get(path + "?limit=1");
+    String resp = client.get(path); //  + "?limit=1"
     Map<String, Object> jsonResp = (Map<String, Object>) JsonUtils.fromString(resp);
     String recordsKey = "";
     for(String key : jsonResp.keySet()) {

@@ -22,15 +22,12 @@ public class FolioStoragePlugin extends AbstractStoragePlugin {
   private final FolioStorageConfig config;
   private final FolioSchemaFactory schemaFactory;
 
-  private final FolioClient client;
+  private FolioClient client;
 
-  public FolioStoragePlugin(FolioStorageConfig config, DrillbitContext context, String name)
-      throws ClientProtocolException, IOException {
+  public FolioStoragePlugin(FolioStorageConfig config, DrillbitContext context, String name) {
     super(context, name);
     this.config = config;
     this.schemaFactory = new FolioSchemaFactory(this, name);
-    this.client = new FolioClient(config.getUrl(), config.getTenant(), config.getUsername(), config.getPassword());
-    System.out.println("Start folio plugin");
   }
 
   @Override
@@ -38,7 +35,10 @@ public class FolioStoragePlugin extends AbstractStoragePlugin {
     this.schemaFactory.registerSchemas(schemaConfig, parent);
   }
 
-  public FolioClient getClient() {
+  public FolioClient getClient() throws ClientProtocolException, IOException {
+    if(client == null) {
+      this.client = new FolioClient(config.getUrl(), config.getTenant(), config.getUsername(), config.getPassword());
+    }
     return client;
   }
 

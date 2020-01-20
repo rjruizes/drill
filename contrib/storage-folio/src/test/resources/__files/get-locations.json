@@ -1,0 +1,130 @@
+{
+  "locations": [
+    {
+      "id": "758258bc-ecc1-41b8-abca-f7b610822ffd",
+      "name": "ORWIG ETHNO CD",
+      "code": "KU/CC/DI/O",
+      "isActive": true,
+      "institutionId": "40ee00ca-a518-4b49-be01-0638d0a4ac57",
+      "campusId": "62cf76b7-cca5-4d33-9217-edf42ce1a848",
+      "libraryId": "5d78803e-ca04-4b4a-aeae-2c63b924518b",
+      "primaryServicePoint": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "servicePointIds": [
+        "3a40852d-49fd-4df2-a1f9-6e2641a6e91f"
+      ],
+      "metadata": {
+        "createdDate": "2020-01-20T03:34:29.633+0000",
+        "updatedDate": "2020-01-20T03:34:29.633+0000"
+      }
+    },
+    {
+      "id": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
+      "name": "SECOND FLOOR",
+      "code": "KU/CC/DI/2",
+      "isActive": true,
+      "institutionId": "40ee00ca-a518-4b49-be01-0638d0a4ac57",
+      "campusId": "62cf76b7-cca5-4d33-9217-edf42ce1a848",
+      "libraryId": "5d78803e-ca04-4b4a-aeae-2c63b924518b",
+      "primaryServicePoint": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "servicePointIds": [
+        "3a40852d-49fd-4df2-a1f9-6e2641a6e91f"
+      ],
+      "metadata": {
+        "createdDate": "2020-01-20T03:34:29.650+0000",
+        "updatedDate": "2020-01-20T03:34:29.650+0000"
+      }
+    },
+    {
+      "id": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "name": "Main Library",
+      "code": "KU/CC/DI/M",
+      "isActive": true,
+      "institutionId": "40ee00ca-a518-4b49-be01-0638d0a4ac57",
+      "campusId": "62cf76b7-cca5-4d33-9217-edf42ce1a848",
+      "libraryId": "5d78803e-ca04-4b4a-aeae-2c63b924518b",
+      "primaryServicePoint": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "servicePointIds": [
+        "3a40852d-49fd-4df2-a1f9-6e2641a6e91f"
+      ],
+      "metadata": {
+        "createdDate": "2020-01-20T03:34:29.662+0000",
+        "updatedDate": "2020-01-20T03:34:29.662+0000"
+      }
+    },
+    {
+      "id": "184aae84-a5bf-4c6a-85ba-4a7c73026cd5",
+      "name": "Online",
+      "code": "E",
+      "description": "Use for online resources",
+      "discoveryDisplayName": "Online",
+      "isActive": true,
+      "institutionId": "40ee00ca-a518-4b49-be01-0638d0a4ac57",
+      "campusId": "470ff1dd-937a-4195-bf9e-06bcfcd135df",
+      "libraryId": "c2549bb4-19c7-4fcc-8b52-39e612fb7dbe",
+      "primaryServicePoint": "bba36e5d-d567-45fa-81cd-b25874472e30",
+      "servicePointIds": [
+        "bba36e5d-d567-45fa-81cd-b25874472e30"
+      ],
+      "metadata": {
+        "createdDate": "2020-01-20T03:34:29.674+0000",
+        "updatedDate": "2020-01-20T03:34:29.674+0000"
+      }
+    },
+    {
+      "id": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "name": "Annex",
+      "code": "KU/CC/DI/A",
+      "isActive": true,
+      "institutionId": "40ee00ca-a518-4b49-be01-0638d0a4ac57",
+      "campusId": "62cf76b7-cca5-4d33-9217-edf42ce1a848",
+      "libraryId": "5d78803e-ca04-4b4a-aeae-2c63b924518b",
+      "primaryServicePoint": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "servicePointIds": [
+        "3a40852d-49fd-4df2-a1f9-6e2641a6e91f"
+      ],
+      "metadata": {
+        "createdDate": "2020-01-20T03:34:29.686+0000",
+        "updatedDate": "2020-01-20T03:34:29.686+0000"
+      }
+    },
+    {
+      "id": "b241764c-1466-4e1d-a028-1a3684a5da87",
+      "name": "Popular Reading Collection",
+      "code": "KU/CC/DI/P",
+      "isActive": true,
+      "institutionId": "40ee00ca-a518-4b49-be01-0638d0a4ac57",
+      "campusId": "62cf76b7-cca5-4d33-9217-edf42ce1a848",
+      "libraryId": "5d78803e-ca04-4b4a-aeae-2c63b924518b",
+      "primaryServicePoint": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "servicePointIds": [
+        "3a40852d-49fd-4df2-a1f9-6e2641a6e91f"
+      ],
+      "metadata": {
+        "createdDate": "2020-01-20T03:34:29.700+0000",
+        "updatedDate": "2020-01-20T03:34:29.700+0000"
+      }
+    },
+    {
+      "id": "31697c89-4164-4447-b5b0-b38870712e0f",
+      "name": "Chalmers_Online",
+      "code": "CIT-online",
+      "discoveryDisplayName": "Online",
+      "isActive": true,
+      "institutionId": "2baae45f-622c-48f6-a990-abe988186bad",
+      "campusId": "a62d8825-3488-40be-9549-945b2fe11cac",
+      "libraryId": "d1374367-e4be-40e6-beb3-0220f25e8348",
+      "details": {},
+      "primaryServicePoint": "c4c90014-c8c9-4ade-8f24-b5e313319f4b",
+      "servicePointIds": [
+        "c4c90014-c8c9-4ade-8f24-b5e313319f4b"
+      ],
+      "metadata": {
+        "createdDate": "2020-01-20T17:01:14.655+0000",
+        "createdByUserId": "7f43b67f-1f80-506d-a2ec-3f88d87d52f2",
+        "updatedDate": "2020-01-20T17:01:14.655+0000",
+        "updatedByUserId": "7f43b67f-1f80-506d-a2ec-3f88d87d52f2"
+      }
+    }
+  ],
+  "totalRecords": 7
+}

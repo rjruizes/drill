@@ -1,0 +1,14 @@
+{
+  "request": {
+      "method": "POST",
+      "url": "/bl-users/login"
+  },
+  "response": {
+      "status": 200,
+      "body": "{}",
+      "headers": {
+          "Content-Type": "application/json",
+          "x-okapi-token": "fake"
+      }
+  }
+}
