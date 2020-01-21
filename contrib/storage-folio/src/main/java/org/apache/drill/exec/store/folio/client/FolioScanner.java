@@ -3,6 +3,7 @@ package org.apache.drill.exec.store.folio.client;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
@@ -13,6 +14,7 @@ public class FolioScanner {
   private String path;
   private FolioClient client;
   private boolean hasMoreRows = true;
+  private List<String> projectedColumnNames;
 
   public FolioScanner(String path, FolioClient client) {
     this.path = path;
@@ -37,5 +39,9 @@ public class FolioScanner {
     hasMoreRows = false;
     return records.iterator(); // TODO: this should concatenate to an iterator, not simply return a new one
   }
+
+public void setProjectedColumnNames(List<String> colNames) {
+  this.projectedColumnNames = colNames;
+}
 
 }

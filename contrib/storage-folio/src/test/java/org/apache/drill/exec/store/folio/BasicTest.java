@@ -87,7 +87,6 @@ public class BasicTest extends ClusterTest {
       pluginRegistry.addEnabledPlugin(pluginName, folioStoragePlugin);
       pluginRegistry.createOrUpdate(pluginName, folioStorageConfig, true);
 
-      String[] servicePointIds = {"3a40852d-49fd-4df2-a1f9-6e2641a6e91f"};
       LinkedHashMap<String, String> metadata = new LinkedHashMap<String, String>();
       metadata.put("createdDate", "2020-01-20T03:34:29.633+0000");
       metadata.put("updatedDate", "2020-01-20T03:34:29.633+0000");
@@ -95,10 +94,14 @@ public class BasicTest extends ClusterTest {
       testBuilder()
         .sqlQuery("SELECT * FROM folio.locations")
         .unOrdered()
-        .baselineColumns("id", "name", "code", "isActive", "institutionId", "campusId", "libraryId", "primaryServicePoint", "servicePointIds", "metadata")
-        .baselineValues("758258bc-ecc1-41b8-abca-f7b610822ffd", "ORWIG ETHNO CD", "KU/CC/DI/O", true, "40ee00ca-a518-4b49-be01-0638d0a4ac57", "62cf76b7-cca5-4d33-9217-edf42ce1a848", "5d78803e-ca04-4b4a-aeae-2c63b924518b", "3a40852d-49fd-4df2-a1f9-6e2641a6e91f", servicePointIds, metadata)
-        // .expectsNumRecords(7)
-        // .baselineValues("xxx.xxx.xxx.xxx", "-", "GET /v1/yyy HTTP/1.1", "200", "412", "-", "Java/1.8.0_201", "3.580", "3.580", "api.example.com")
+        .baselineColumns("id", "name", "code", "isActive", "institutionId", "campusId",
+        "libraryId", "primaryServicePoint", "servicePointIds", "metadata",
+        "description", "details", "discoveryDisplayName")
+        .baselineValues("758258bc-ecc1-41b8-abca-f7b610822ffd", "ORWIG ETHNO CD", "KU/CC/DI/O",
+        "true", "40ee00ca-a518-4b49-be01-0638d0a4ac57", "62cf76b7-cca5-4d33-9217-edf42ce1a848",
+        "5d78803e-ca04-4b4a-aeae-2c63b924518b", "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+        "[3a40852d-49fd-4df2-a1f9-6e2641a6e91f]", metadata.toString(),
+        null, null, null)
         .go();
       } catch (Exception e) {
         e.printStackTrace();

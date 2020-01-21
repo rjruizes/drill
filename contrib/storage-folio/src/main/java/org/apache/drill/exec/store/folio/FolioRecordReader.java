@@ -98,26 +98,15 @@ public class FolioRecordReader extends AbstractRecordReader {
     try {
       scanner = new FolioScanner(scanSpec.getTableName(), client);
       
-      // ArrayList<ApiField> fields = client.getSchema(scanSpec.getTableName());
       System.out.println("tableName: " + scanSpec.getTableName());
-      // FolioScannerBuilder builder = client.newScannerBuilder(table);
       if(!isStarQuery()) {
         System.out.println("Is NOT a star query");
         List<String> colNames = Lists.newArrayList();
         for (SchemaPath p : this.getColumns()) {
           colNames.add(p.getRootSegmentPath());
         }
-        // builder.setProjectedColumnNames(colNames);
+        scanner.setProjectedColumnNames(colNames);
       }
-    //   context.getStats().startWait();
-    //   try {
-    //     scanner = builder
-    //         .lowerBoundRaw(scanSpec.getStartKey())
-    //         .exclusiveUpperBoundRaw(scanSpec.getEndKey())
-    //         .build();
-    //   } finally {
-    //     context.getStats().stopWait();
-    //   }
     } catch (Exception e) {
       throw new ExecutionSetupException(e);
     }
