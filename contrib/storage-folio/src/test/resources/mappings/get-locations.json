@@ -5,7 +5,7 @@
   },
   "response": {
       "status": 200,
-      "bodyFileName": "get-locations-limit-1.json",
+      "bodyFileName": "get-locations.json",
       "headers": {
           "Content-Type": "application/json"
       }
