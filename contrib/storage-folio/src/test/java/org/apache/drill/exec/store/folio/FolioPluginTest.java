@@ -9,8 +9,8 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 // import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import org.apache.drill.shaded.guava.com.google.common.io.Resources;
-import org.apache.drill.exec.server.DrillbitContext;
-import org.apache.drill.exec.store.StoragePluginRegistryImpl;
+import org.apache.drill.exec.server.Drillbit;
+import org.apache.drill.exec.store.StoragePluginRegistry;
 import org.apache.drill.test.ClusterFixture;
 import org.apache.drill.test.ClusterTest;
 import org.junit.BeforeClass;
@@ -25,45 +25,88 @@ public class FolioPluginTest extends ClusterTest {
   public WireMockRule folioTestFixture = new WireMockRule(8081);
 
   @BeforeClass
-  public static void setupDrill() throws Exception {
+  public static void setup() throws Exception {
 
     startCluster(ClusterFixture.builder(dirTestWatcher));
 
     String url = "", tenant = "", username = "", password = "";
     try {
-      JSONParser parser = new JSONParser();
-      File jsonFile = new File(Resources.getResource("bootstrap-storage-plugins.json").toURI());
-      Object obj = parser.parse(new FileReader(jsonFile));
-      JSONObject bootstrap = (JSONObject) obj;
-      JSONObject storage = (JSONObject) bootstrap.get("storage");
-      JSONObject folioConfig = (JSONObject) storage.get("folio");
+      final JSONParser parser = new JSONParser();
+      final File jsonFile = new File(Resources.getResource("bootstrap-storage-plugins.json").toURI());
+      final Object obj = parser.parse(new FileReader(jsonFile));
+      final JSONObject bootstrap = (JSONObject) obj;
+      final JSONObject storage = (JSONObject) bootstrap.get("storage");
+      final JSONObject folioConfig = (JSONObject) storage.get("folio");
       url = (String) folioConfig.get("url");
       tenant = (String) folioConfig.get("tenant");
       username = (String) folioConfig.get("username");
       password = (String) folioConfig.get("password");
 
-      FolioStorageConfig folioStorageConfig = new FolioStorageConfig(url, tenant, username, password);
+      final FolioStorageConfig folioStorageConfig = new FolioStorageConfig(url, tenant, username, password);
       folioStorageConfig.setEnabled(true);
 
-      String pluginName = "folio";
-      DrillbitContext context = cluster.drillbit().getContext();
-      FolioStoragePlugin folioStoragePlugin = new FolioStoragePlugin(folioStorageConfig,
-          context, pluginName);
+      final String pluginName = "folio";
 
-      StoragePluginRegistryImpl pluginRegistry = (StoragePluginRegistryImpl) context.getStorage();
+      final Drillbit drillbit = cluster.drillbit();
+      final StoragePluginRegistry pluginRegistry = drillbit.getContext().getStorage();
+
+      final FolioStoragePlugin folioStoragePlugin = new FolioStoragePlugin(folioStorageConfig,
+          drillbit.getContext(), pluginName);
+
       // pluginRegistry.addPluginToPersistentStoreIfAbsent(pluginName, folioStorageConfig, folioStoragePlugin);
       pluginRegistry.addEnabledPlugin(pluginName, folioStoragePlugin);
       pluginRegistry.createOrUpdate(pluginName, folioStorageConfig, true);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       e.printStackTrace();
     }
+  }
+
+  @Test
+  public void testLimit() throws Exception {
+    testBuilder()
+      .sqlQuery("SELECT id FROM folio.locations LIMIT 3")
+      .unOrdered()
+      .expectsNumRecords(3)
+      .go();
+  }
+
+  @Test
+  public void orderByIdAscending() throws Exception {
+    testBuilder()
+      .sqlQuery("SELECT id FROM folio.locations ORDER BY id ASC")
+      .unOrdered()
+      .baselineColumns("id")
+      .baselineValues("184aae84-a5bf-4c6a-85ba-4a7c73026cd5")
+      .baselineValues("31697c89-4164-4447-b5b0-b38870712e0f")
+      .baselineValues("53cf956f-c1df-410b-8bea-27f712cca7c0")
+      .baselineValues("758258bc-ecc1-41b8-abca-f7b610822ffd")
+      .baselineValues("b241764c-1466-4e1d-a028-1a3684a5da87")
+      .baselineValues("f34d27c6-a8eb-461b-acd6-5dea81771e70")
+      .baselineValues("fcd64ce1-6995-48f0-840e-89ffa2288371")
+      .go();
+  }
+
+  @Test
+  public void orderByIdDescending() throws Exception {
+    testBuilder()
+      .sqlQuery("SELECT id FROM folio.locations ORDER BY id DESC")
+      .unOrdered()
+      .baselineColumns("id")
+      .baselineValues("fcd64ce1-6995-48f0-840e-89ffa2288371")
+      .baselineValues("f34d27c6-a8eb-461b-acd6-5dea81771e70")
+      .baselineValues("b241764c-1466-4e1d-a028-1a3684a5da87")
+      .baselineValues("758258bc-ecc1-41b8-abca-f7b610822ffd")
+      .baselineValues("53cf956f-c1df-410b-8bea-27f712cca7c0")
+      .baselineValues("31697c89-4164-4447-b5b0-b38870712e0f")
+      .baselineValues("184aae84-a5bf-4c6a-85ba-4a7c73026cd5")
+      .go();
   }
 
   @Test
   public void selectId() throws Exception {
     System.out.println("selectId");
     testBuilder()
-      .sqlQuery("SELECT id FROM folio.locations")
+      .sqlQuery("SELECT id FROM folio.locations WHERE id='758258bc-ecc1-41b8-abca-f7b610822ffd'")
       .unOrdered()
       .baselineColumns("id")
       .baselineValues("758258bc-ecc1-41b8-abca-f7b610822ffd")
@@ -73,12 +116,12 @@ public class FolioPluginTest extends ClusterTest {
   @Test
   public void selectAll() throws Exception {
     System.out.println("selectAll");
-    LinkedHashMap<String, String> metadata = new LinkedHashMap<String, String>();
+    final LinkedHashMap<String, String> metadata = new LinkedHashMap<String, String>();
     metadata.put("createdDate", "2020-01-20T03:34:29.633+0000");
     metadata.put("updatedDate", "2020-01-20T03:34:29.633+0000");
 
     testBuilder()
-      .sqlQuery("SELECT * FROM folio.locations")
+      .sqlQuery("SELECT * FROM folio.locations WHERE id='758258bc-ecc1-41b8-abca-f7b610822ffd'")
       .unOrdered()
       .baselineColumns("id", "name", "code", "isActive", "institutionId", "campusId",
       "libraryId", "primaryServicePoint", "servicePointIds", "metadata",
