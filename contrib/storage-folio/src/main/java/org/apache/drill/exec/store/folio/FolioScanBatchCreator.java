@@ -41,13 +41,14 @@ public class FolioScanBatchCreator implements BatchCreator<FolioSubScan>{
     Preconditions.checkArgument(children.isEmpty());
     List<RecordReader> readers = new LinkedList<>();
     List<SchemaPath> columns = null;
+    int maxRecords = subScan.getMaxRecordsToRead();
 
     for (FolioSubScan.FolioSubScanSpec scanSpec : subScan.getTabletScanSpecList()) {
       try {
         if ((columns = subScan.getColumns())==null) {
           columns = GroupScan.ALL_COLUMNS;
         }
-        readers.add(new FolioRecordReader(subScan.getStorageEngine().getClient(), scanSpec, columns));
+        readers.add(new FolioRecordReader(subScan.getStorageEngine().getClient(), scanSpec, columns, maxRecords));
       } catch (Exception e1) {
         throw new ExecutionSetupException(e1);
       }

@@ -27,22 +27,27 @@ public class FolioSubScan extends AbstractSubScan {
   private final FolioStoragePlugin folioStoragePlugin;
   private final List<FolioSubScanSpec> scanSpecList;
   private final List<SchemaPath> columns;
+  private int maxRecordsToRead;
 
   public FolioSubScan(@JacksonInject StoragePluginRegistry registry,
                       @JsonProperty("folioStoragePluginConfig") FolioStorageConfig folioStorageConfig,
                       @JsonProperty("tabletScanSpecList") LinkedList<FolioSubScanSpec> tabletScanSpecList,
-                      @JsonProperty("columns") List<SchemaPath> columns) throws ExecutionSetupException {
+                      @JsonProperty("columns") List<SchemaPath> columns,
+                      @JsonProperty("maxRecordsToRead") int maxRecordsToRead) throws ExecutionSetupException {
     super((String) null);
     this.folioStoragePlugin = (FolioStoragePlugin) registry.getPlugin(folioStorageConfig);
     this.scanSpecList = tabletScanSpecList;
     this.columns = columns;
+    this.maxRecordsToRead = maxRecordsToRead;
   }
 
-  public FolioSubScan(FolioStoragePlugin plugin, List<FolioSubScanSpec> tabletInfoList, List<SchemaPath> columns) {
+  public FolioSubScan(FolioStoragePlugin plugin, List<FolioSubScanSpec> tabletInfoList, List<SchemaPath> columns,
+      int maxRecordsToRead) {
     super((String) null);
     this.folioStoragePlugin = plugin;
     this.scanSpecList = tabletInfoList;
     this.columns = columns;
+    this.maxRecordsToRead = maxRecordsToRead;
   }
 
   public FolioStorageConfig getFolioStoragePluginConfig() {
@@ -53,8 +58,14 @@ public class FolioSubScan extends AbstractSubScan {
     return scanSpecList;
   }
 
+  @JsonProperty("columns")
   public List<SchemaPath> getColumns() {
     return columns;
+  }
+
+  @JsonProperty("maxRecordsToRead")
+  public int getMaxRecordsToRead() {
+    return maxRecordsToRead;
   }
 
   @Override
@@ -74,7 +85,7 @@ public class FolioSubScan extends AbstractSubScan {
   @Override
   public PhysicalOperator getNewWithChildren(List<PhysicalOperator> children) {
     Preconditions.checkArgument(children.isEmpty());
-    return new FolioSubScan(folioStoragePlugin, scanSpecList, columns);
+    return new FolioSubScan(folioStoragePlugin, scanSpecList, columns, maxRecordsToRead);
   }
 
   @Override

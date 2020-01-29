@@ -76,6 +76,7 @@ public class FolioRecordReader extends AbstractRecordReader {
   private OutputMutator output;
   private OperatorContext context;
   private boolean hasBeenRead = false;
+  private int maxRecords = -1;
 
   private static class ProjectedColumnInfo {
     String index;
@@ -84,9 +85,11 @@ public class FolioRecordReader extends AbstractRecordReader {
 
   private ImmutableList<ProjectedColumnInfo> projectedCols;
 
-  public FolioRecordReader(FolioClient client, FolioSubScan.FolioSubScanSpec subScanSpec, List<SchemaPath> projectedColumns) {
+  public FolioRecordReader(FolioClient client, FolioSubScan.FolioSubScanSpec subScanSpec, List<SchemaPath> projectedColumns,
+    int maxRecords) {
     setColumns(projectedColumns);
     this.client = client;
+    this.maxRecords = maxRecords;
     scanSpec = subScanSpec;
     logger.debug("Scan spec: {}", subScanSpec);
   }
@@ -96,7 +99,7 @@ public class FolioRecordReader extends AbstractRecordReader {
     this.output = output;
     this.context = context;
     try {
-      scanner = new FolioScanner(scanSpec.getTableName(), client);
+      scanner = new FolioScanner(scanSpec.getTableName(), client, maxRecords);
       
       System.out.println("tableName: " + scanSpec.getTableName());
       if(!isStarQuery()) {

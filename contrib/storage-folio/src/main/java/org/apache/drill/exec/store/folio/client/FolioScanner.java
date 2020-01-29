@@ -15,10 +15,12 @@ public class FolioScanner {
   private FolioClient client;
   private boolean hasMoreRows = true;
   private List<String> projectedColumnNames;
+  private int maxRecords;
 
-  public FolioScanner(String path, FolioClient client) {
+  public FolioScanner(String path, FolioClient client, int maxRecords) {
     this.path = path;
     this.client = client;
+    this.maxRecords = maxRecords;
   }
 
   public boolean hasMoreRows() {

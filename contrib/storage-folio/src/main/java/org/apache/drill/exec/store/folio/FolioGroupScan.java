@@ -43,6 +43,8 @@ public class FolioGroupScan extends AbstractGroupScan {
   private static final long DEFAULT_TABLET_SIZE = 1000;
   private List<EndpointAffinity> affinities;
   private List<FolioWork> folioWorkList = Lists.newArrayList();
+  private boolean filterPushedDown = false;
+  protected int maxRecordsToRead = -1;
 
   @JsonCreator
   public FolioGroupScan(@JsonProperty("folioScanSpec") FolioScanSpec folioScanSpec,
@@ -60,6 +62,41 @@ public class FolioGroupScan extends AbstractGroupScan {
     this.folioScanSpec = folioScanSpec;
     this.columns = columns == null || columns.size() == 0? ALL_COLUMNS : columns;
     init();
+  }
+
+  /**
+   * Checks if Json table reader supports limit push down.
+   *
+   * @return true if limit push down is supported, false otherwise
+   */
+  @Override
+  public boolean supportsLimitPushdown() {
+    if (maxRecordsToRead < 0) {
+      return true;
+    }
+    return false; // limit is already pushed. No more pushdown of limit
+  }
+
+  @Override
+  public GroupScan applyLimit(int maxRecords) {
+    maxRecordsToRead = Math.max(maxRecords, 1);
+    return this;
+  }
+
+  @Override
+  @JsonIgnore
+  public boolean canPushdownProjects(List<SchemaPath> columns) {
+    return true;
+  }
+
+  @JsonIgnore
+  public boolean isFilterPushedDown() {
+    return filterPushedDown;
+  }
+
+  @JsonIgnore
+  public void setFilterPushedDown(boolean filterPushedDown) {
+    this.filterPushedDown = filterPushedDown;
   }
 
   private void init() {
@@ -132,7 +169,8 @@ public class FolioGroupScan extends AbstractGroupScan {
     this.folioStoragePlugin = that.folioStoragePlugin;
     this.columns = that.columns;
     this.folioScanSpec = that.folioScanSpec;
-    // this.filterPushedDown = that.filterPushedDown;
+    this.filterPushedDown = that.filterPushedDown;
+    this.maxRecordsToRead = that.maxRecordsToRead;
     // this.folioWorkList = that.folioWorkList;
     // this.assignments = that.assignments;
   }
@@ -175,7 +213,7 @@ public class FolioGroupScan extends AbstractGroupScan {
     //   scanSpecList.add(new KuduSubScanSpec(getTableName(), work.getPartitionKeyStart(), work.getPartitionKeyEnd()));
     // }
     scanSpecList.add(new FolioSubScanSpec(getTableName()));
-    return new FolioSubScan(folioStoragePlugin, scanSpecList, this.columns);
+    return new FolioSubScan(folioStoragePlugin, scanSpecList, this.columns, this.maxRecordsToRead);
   }
 
   @Override
@@ -187,6 +225,11 @@ public class FolioGroupScan extends AbstractGroupScan {
   @JsonIgnore
   public String getTableName() {
     return getFolioScanSpec().getTableName();
+  }
+
+  @JsonIgnore
+  public FolioStoragePlugin getStoragePlugin() {
+    return folioStoragePlugin;
   }
 
   @Override
