@@ -44,7 +44,7 @@ public class FolioGroupScan extends AbstractGroupScan {
   private List<EndpointAffinity> affinities;
   private List<FolioWork> folioWorkList = Lists.newArrayList();
   private boolean filterPushedDown = false;
-  protected int maxRecordsToRead = -1;
+  protected int maxRecordsToRead = 100;
 
   @JsonCreator
   public FolioGroupScan(@JsonProperty("folioScanSpec") FolioScanSpec folioScanSpec,
@@ -212,7 +212,7 @@ public class FolioGroupScan extends AbstractGroupScan {
     // for (KuduWork work : workList) {
     //   scanSpecList.add(new KuduSubScanSpec(getTableName(), work.getPartitionKeyStart(), work.getPartitionKeyEnd()));
     // }
-    scanSpecList.add(new FolioSubScanSpec(getTableName()));
+    scanSpecList.add(new FolioSubScanSpec(getTableName(), getFilters()));
     return new FolioSubScan(folioStoragePlugin, scanSpecList, this.columns, this.maxRecordsToRead);
   }
 
@@ -225,6 +225,10 @@ public class FolioGroupScan extends AbstractGroupScan {
   @JsonIgnore
   public String getTableName() {
     return getFolioScanSpec().getTableName();
+  }
+  @JsonIgnore
+  public Filter getFilters() {
+    return getFolioScanSpec().getFilters();
   }
 
   @JsonIgnore

@@ -95,14 +95,20 @@ public class FolioSubScan extends AbstractSubScan {
 
   public static class FolioSubScanSpec {
     private final String tableName;
+    private Filter filters;
 
     @JsonCreator
-    public FolioSubScanSpec(@JsonProperty("tableName") String tableName) {
+    public FolioSubScanSpec(@JsonProperty("tableName") String tableName,
+      @JsonProperty("filters") Filter filters) {
       this.tableName = tableName;
+      this.filters = filters;
     }
 
     public String getTableName() {
       return tableName;
+    }
+    public Filter getFilters() {
+      return filters;
     }
   }
 

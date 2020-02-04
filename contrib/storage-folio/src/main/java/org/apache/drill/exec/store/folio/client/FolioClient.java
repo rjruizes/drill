@@ -1,6 +1,7 @@
 package org.apache.drill.exec.store.folio.client;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.apache.drill.exec.store.folio.client.Login;
@@ -11,6 +12,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -20,11 +22,13 @@ public class FolioClient {
     public String okapiUrl;
     private String tenant;
     private String token;
+    private URIBuilder baseURI;
 
     public FolioClient(String okapiUrl, String tenant, String user, String pass)
-            throws ClientProtocolException, IOException {
+            throws ClientProtocolException, IOException, URISyntaxException {
         this.httpclient = HttpClients.createDefault();
         this.okapiUrl = okapiUrl;
+        this.baseURI = new URIBuilder(okapiUrl);
         this.tenant = tenant;
         this.token = Login.login(okapiUrl, tenant, user, pass);
     }
@@ -46,18 +50,22 @@ public class FolioClient {
         };
     }
 
-    private HttpUriRequest authenticatedRequest(String method, String path) {
-        return RequestBuilder.create(method).setUri(okapiUrl + path).setHeader("Accept", "application/json")
+    public URIBuilder getURI() throws URISyntaxException {
+        return baseURI;
+    }
+
+    private HttpUriRequest authenticatedRequest(String method, String uri) {
+        return RequestBuilder.create(method).setUri(uri).setHeader("Accept", "application/json")
                 .setHeader("X-Okapi-Tenant", tenant).setHeader("X-Okapi-Token", token).build();
     }
 
-    public String get(String path) throws ClientProtocolException, IOException {
-        HttpUriRequest request = authenticatedRequest("GET", path);
+    public String get(String uri) throws ClientProtocolException, IOException {
+        HttpUriRequest request = authenticatedRequest("GET", uri);
         return httpclient.execute(request, responseHandler());
     }
 
-    public String post(String path) throws ClientProtocolException, IOException {
-        HttpUriRequest request = authenticatedRequest("POST", path);
+    public String post(String uri) throws ClientProtocolException, IOException {
+        HttpUriRequest request = authenticatedRequest("POST", uri);
         return httpclient.execute(request, responseHandler());
     }
 

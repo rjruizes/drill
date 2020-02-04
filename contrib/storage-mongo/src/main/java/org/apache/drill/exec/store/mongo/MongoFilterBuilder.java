@@ -131,7 +131,7 @@ public class MongoFilterBuilder extends
           nodeScanSpec = createMongoScanSpec(processor.getFunctionName(),
               processor.getPath(), processor.getValue());
         } catch (Exception e) {
-          logger.error(" Failed to creare Filter ", e);
+          logger.error(" Failed to create Filter ", e);
           // throw new RuntimeException(e.getMessage(), e);
         }
       }

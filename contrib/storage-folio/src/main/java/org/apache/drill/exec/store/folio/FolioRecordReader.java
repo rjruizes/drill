@@ -77,6 +77,7 @@ public class FolioRecordReader extends AbstractRecordReader {
   private OperatorContext context;
   private boolean hasBeenRead = false;
   private int maxRecords = -1;
+  private Filter filters;
 
   private static class ProjectedColumnInfo {
     String index;
@@ -90,7 +91,8 @@ public class FolioRecordReader extends AbstractRecordReader {
     setColumns(projectedColumns);
     this.client = client;
     this.maxRecords = maxRecords;
-    scanSpec = subScanSpec;
+    this.scanSpec = subScanSpec;
+    this.filters = subScanSpec.getFilters();
     logger.debug("Scan spec: {}", subScanSpec);
   }
 
@@ -99,7 +101,7 @@ public class FolioRecordReader extends AbstractRecordReader {
     this.output = output;
     this.context = context;
     try {
-      scanner = new FolioScanner(scanSpec.getTableName(), client, maxRecords);
+      scanner = new FolioScanner(scanSpec.getTableName(), client, maxRecords, filters);
       
       System.out.println("tableName: " + scanSpec.getTableName());
       if(!isStarQuery()) {
