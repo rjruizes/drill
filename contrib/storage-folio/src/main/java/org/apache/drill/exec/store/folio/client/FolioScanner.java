@@ -9,7 +9,6 @@ import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import org.apache.commons.httpclient.URI;
 import org.apache.drill.exec.store.folio.Filter;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.utils.URIBuilder;
@@ -23,7 +22,7 @@ public class FolioScanner {
   public FolioScanner(String path, FolioClient client, int maxRecords, Filter filters) throws URISyntaxException {
     this.client = client;
     URIBuilder uriBuilder = client.getURI()
-      .setPath(path)
+      .setPath(path.replaceAll("\\.", "/"))
       .addParameter("limit", String.valueOf(maxRecords));
     if(filters != null) {
       uriBuilder.addParameter("query", filters.toCql());

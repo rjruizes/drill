@@ -2,7 +2,7 @@ package org.apache.drill.exec.store.folio;
 
 import static org.junit.Assert.assertEquals;
 
-import org.z3950.zing.cql.*;
+// import org.z3950.zing.cql.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;

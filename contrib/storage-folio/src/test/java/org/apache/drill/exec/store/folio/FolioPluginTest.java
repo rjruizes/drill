@@ -62,9 +62,18 @@ public class FolioPluginTest extends ClusterTest {
   }
 
   @Test
+  public void testInventoryItems() throws Exception {
+    testBuilder()
+      .sqlQuery("SELECT `id` FROM folio.`inventory/items` LIMIT 3")
+      .unOrdered()
+      .expectsNumRecords(3)
+      .go();
+  }
+
+  @Test
   public void testLimit() throws Exception {
     testBuilder()
-      .sqlQuery("SELECT id FROM folio.locations LIMIT 3")
+      .sqlQuery("SELECT `id` FROM folio.locations LIMIT 3")
       .unOrdered()
       .expectsNumRecords(3)
       .go();

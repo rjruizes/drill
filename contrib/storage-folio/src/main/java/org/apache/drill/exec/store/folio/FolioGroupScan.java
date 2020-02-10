@@ -71,7 +71,7 @@ public class FolioGroupScan extends AbstractGroupScan {
    */
   @Override
   public boolean supportsLimitPushdown() {
-    if (maxRecordsToRead < 0) {
+    if (maxRecordsToRead == 100) {
       return true;
     }
     return false; // limit is already pushed. No more pushdown of limit

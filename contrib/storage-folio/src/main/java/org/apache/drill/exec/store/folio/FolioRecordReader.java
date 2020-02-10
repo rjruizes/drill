@@ -175,7 +175,11 @@ public class FolioRecordReader extends AbstractRecordReader {
     }
 
     for (ProjectedColumnInfo pci : projectedCols) {
-      ByteBuffer value = ByteBuffer.wrap(record.get(pci.index).toString().getBytes());
+      Object field = record.get(pci.index);
+      if(field == null) {
+        field = "null";
+      }
+      ByteBuffer value = ByteBuffer.wrap(field.toString().getBytes());
       
       ((NullableVarCharVector.Mutator) pci.vv.getMutator())
         .setSafe(rowIndex, value, 0, value.remaining());

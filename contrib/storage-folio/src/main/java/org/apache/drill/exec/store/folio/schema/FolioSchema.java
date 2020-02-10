@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.Table;
@@ -14,7 +16,6 @@ import org.apache.drill.exec.planner.logical.DynamicDrillTable;
 import org.apache.drill.exec.store.AbstractSchema;
 import org.apache.drill.exec.store.folio.FolioScanSpec;
 import org.apache.drill.exec.store.folio.FolioStoragePlugin;
-import org.apache.drill.exec.store.folio.raml.ApiField;
 import org.apache.drill.exec.store.folio.FolioStorageConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,9 @@ public class FolioSchema extends AbstractSchema {
 
   private static final Logger logger = LoggerFactory.getLogger(FolioSchema.class);
   private final FolioStoragePlugin plugin;
+  private final Map<String, FolioSubSchema> schemaMap = Maps.newHashMap();
   private final Map<String, DrillTable> drillTables = Maps.newHashMap();
-  private Set<String> tableNames;
+  // private Set<String> tableNames = new HashSet<>(Arrays.asList("locations", "example2"));
 
   public FolioSchema(final FolioStoragePlugin plugin, final String name) {
     super(ImmutableList.of(), name);
@@ -45,33 +47,52 @@ public class FolioSchema extends AbstractSchema {
     }
   }
 
+  // @Override
+  // public AbstractSchema getSubSchema(String name) {
+  //   // List<String> tables;
+  //   if (! schemaMap.containsKey(name)) {
+  //     // tables = tableNameLoader.get(name);
+  //     schemaMap.put(name, new FolioSubSchema(this, name));
+  //   }
+
+  //   return schemaMap.get(name);
+  // }
+
+
+  DrillTable getDrillTable(String tableName) {
+    // MongoScanSpec mongoScanSpec = new MongoScanSpec(dbName, collectionName);
+    // return new DynamicDrillTable(plugin, getName(), null, mongoScanSpec);
+    FolioScanSpec scanSpec = new FolioScanSpec(tableName);
+    return new DynamicDrillTable(plugin, tableName, null, scanSpec);
+  }
+
   @Override
-  public Table getTable(String name) {
-    FolioScanSpec scanSpec = new FolioScanSpec(name);
-    try {
-      ArrayList<ApiField> fields = plugin.getClient().getSchema(scanSpec.getTableName());
-      return new DrillFolioTable(getName(), plugin, fields, scanSpec);
-    } catch (Exception e) {
-      logger.warn("Failure while retrieving folio table {}", name, e);
-      return null;
+  public Table getTable(String tableName) {
+
+    // if (!tableNames.contains(tableName)) { // table does not exist
+    //   return null;
+    // }
+
+    if (! drillTables.containsKey(tableName)) {
+      FolioScanSpec scanSpec = new FolioScanSpec(tableName);
+      drillTables.put(tableName, new DynamicDrillTable(plugin, getName(), null, scanSpec));
     }
 
+    return drillTables.get(tableName);
   }
 
-  @Override
-  public Set<String> getTableNames() {
-    // if (tableNames == null) {
-    //   try (KafkaConsumer<?, ?> kafkaConsumer = new KafkaConsumer<>(plugin.getConfig().getKafkaConsumerProps())) {
-    //     tableNames = kafkaConsumer.listTopics().keySet();
-    //   } catch (Exception e) {
-    //     logger.warn("Failure while loading table names for database '{}': {}", getName(), e.getMessage(), e.getCause());
-    //     return Collections.emptySet();
-    //   }
-    // }
-    // return tableNames;
-    Set<String> set = new HashSet<>(Arrays.asList("locations", "example2"));
-    return set;
-  }
+  // @Override
+  // public Set<String> getTableNames() {
+  //   if (tableNames == null) {
+  //     try {
+  //       tableNames = new HashSet<>(Arrays.asList("locations", "example2"));
+  //     } catch (Exception e) {
+  //       logger.warn("Failure while loading table names for database '{}': {}", getName(), e.getMessage(), e.getCause());
+  //       return Collections.emptySet();
+  //     }
+  //   }
+  //   return tableNames;
+  // }
 
   @Override
   public Set<String> getSubSchemaNames() {
