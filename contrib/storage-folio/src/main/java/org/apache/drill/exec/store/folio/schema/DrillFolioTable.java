@@ -34,7 +34,7 @@ import org.apache.drill.exec.store.folio.FolioScanSpec;
 import org.apache.drill.shaded.guava.com.google.common.collect.Lists;
 
 public class DrillFolioTable extends DynamicDrillTable {
-  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DrillFolioTable.class);
+  // private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DrillFolioTable.class);
 
   private final ArrayList<ApiField> fields;
 

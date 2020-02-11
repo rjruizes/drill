@@ -14,16 +14,13 @@ import org.apache.drill.exec.store.SchemaConfig;
 import org.apache.drill.exec.store.StoragePluginOptimizerRule;
 import org.apache.drill.exec.store.folio.schema.FolioSchemaFactory;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableSet;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FolioStoragePlugin extends AbstractStoragePlugin {
-  private static final Logger logger = LoggerFactory.getLogger(FolioStoragePlugin.class);
+  // private static final Logger logger = LoggerFactory.getLogger(FolioStoragePlugin.class);
   private final FolioStorageConfig config;
   private final FolioSchemaFactory schemaFactory;
 

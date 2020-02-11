@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+// import java.util.List;
 import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
@@ -16,7 +16,7 @@ import org.apache.http.client.utils.URIBuilder;
 public class FolioScanner {
   private FolioClient client;
   private boolean hasMoreRows = true;
-  private List<String> projectedColumnNames;
+  // private List<String> projectedColumnNames;
   private String uri;
 
   public FolioScanner(String path, FolioClient client, int maxRecords, Filter filters) throws URISyntaxException {
@@ -49,8 +49,8 @@ public class FolioScanner {
     return records.iterator(); // TODO: this should concatenate to an iterator, not simply return a new one
   }
 
-public void setProjectedColumnNames(List<String> colNames) {
-  this.projectedColumnNames = colNames;
-}
+// public void setProjectedColumnNames(List<String> colNames) {
+//   this.projectedColumnNames = colNames;
+// }
 
 }

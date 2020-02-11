@@ -17,9 +17,7 @@
  */
 package org.apache.drill.exec.store.folio.schema;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.drill.shaded.guava.com.google.common.collect.Maps;
 import org.apache.calcite.schema.Table;
@@ -27,9 +25,6 @@ import org.apache.calcite.schema.Table;
 import org.apache.drill.exec.planner.logical.DrillTable;
 import org.apache.drill.exec.store.AbstractSchema;
 import org.apache.drill.exec.store.folio.FolioStorageConfig;
-import org.apache.drill.exec.store.folio.schema.FolioSchema;
-
-import org.apache.drill.shaded.guava.com.google.common.collect.Sets;
 
 public class FolioSubSchema extends AbstractSchema {
   static final org.slf4j.Logger logger = org.slf4j.LoggerFactory
@@ -39,8 +34,7 @@ public class FolioSubSchema extends AbstractSchema {
 
   private final Map<String, DrillTable> drillTables = Maps.newHashMap();
 
-  public FolioSubSchema(FolioSchema folioSchema, // List<String> tableList, 
-      String name) {
+  public FolioSubSchema(FolioSchema folioSchema, String name) {
     super(folioSchema.getSchemaPath(), name);
     this.folioSchema = folioSchema;
     // this.tableNames = Sets.newHashSet(tableList);

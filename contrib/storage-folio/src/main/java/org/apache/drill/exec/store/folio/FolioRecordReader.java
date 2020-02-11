@@ -18,13 +18,9 @@
 package org.apache.drill.exec.store.folio;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.github.jsonldjava.utils.JsonUtils;
 
 import org.apache.drill.common.exceptions.ExecutionSetupException;
 import org.apache.drill.common.expression.SchemaPath;
@@ -40,25 +36,8 @@ import org.apache.drill.exec.store.AbstractRecordReader;
 import org.apache.drill.exec.store.folio.FolioSubScan.FolioSubScanSpec;
 import org.apache.drill.exec.store.folio.client.FolioClient;
 import org.apache.drill.exec.store.folio.client.FolioScanner;
-import org.apache.drill.exec.store.folio.raml.ApiField;
-import org.apache.drill.exec.vector.BigIntVector;
-import org.apache.drill.exec.vector.BitVector;
-import org.apache.drill.exec.vector.Float4Vector;
-import org.apache.drill.exec.vector.Float8Vector;
-import org.apache.drill.exec.vector.IntVector;
-import org.apache.drill.exec.vector.NullableBigIntVector;
-import org.apache.drill.exec.vector.NullableBitVector;
-import org.apache.drill.exec.vector.NullableFloat4Vector;
-import org.apache.drill.exec.vector.NullableFloat8Vector;
-import org.apache.drill.exec.vector.NullableIntVector;
-import org.apache.drill.exec.vector.NullableTimeStampVector;
-import org.apache.drill.exec.vector.NullableVarBinaryVector;
 import org.apache.drill.exec.vector.NullableVarCharVector;
-import org.apache.drill.exec.vector.TimeStampVector;
 import org.apache.drill.exec.vector.ValueVector;
-import org.apache.drill.exec.vector.VarBinaryVector;
-import org.apache.drill.exec.vector.VarCharVector;
-import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableMap;
 
 import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableList;
 import org.apache.drill.shaded.guava.com.google.common.collect.Lists;
@@ -74,8 +53,8 @@ public class FolioRecordReader extends AbstractRecordReader {
   private Iterator<Map<String, Object>> iterator;
 
   private OutputMutator output;
-  private OperatorContext context;
-  private boolean hasBeenRead = false;
+  // private OperatorContext context;
+  // private boolean hasBeenRead = false;
   private int maxRecords = -1;
   private Filter filters;
 
@@ -99,10 +78,10 @@ public class FolioRecordReader extends AbstractRecordReader {
   @Override
   public void setup(OperatorContext context, OutputMutator output) throws ExecutionSetupException {
     this.output = output;
-    this.context = context;
+    // this.context = context;
     try {
       scanner = new FolioScanner(scanSpec.getTableName(), client, maxRecords, filters);
-      
+
       System.out.println("tableName: " + scanSpec.getTableName());
       if(!isStarQuery()) {
         System.out.println("Is NOT a star query");
@@ -110,7 +89,7 @@ public class FolioRecordReader extends AbstractRecordReader {
         for (SchemaPath p : this.getColumns()) {
           colNames.add(p.getRootSegmentPath());
         }
-        scanner.setProjectedColumnNames(colNames);
+        // scanner.setProjectedColumnNames(colNames);
       }
     } catch (Exception e) {
       throw new ExecutionSetupException(e);
@@ -151,7 +130,7 @@ public class FolioRecordReader extends AbstractRecordReader {
       if(val instanceof String) {
         minorType = MinorType.VARCHAR;
       }
-      
+
       MajorType majorType = Types.optional(minorType);
       MaterializedField field = MaterializedField.create(name, majorType);
       final Class<? extends ValueVector> clazz = TypeHelper.getValueVectorClass(
@@ -180,7 +159,7 @@ public class FolioRecordReader extends AbstractRecordReader {
         field = "null";
       }
       ByteBuffer value = ByteBuffer.wrap(field.toString().getBytes());
-      
+
       ((NullableVarCharVector.Mutator) pci.vv.getMutator())
         .setSafe(rowIndex, value, 0, value.remaining());
     }

@@ -1,6 +1,5 @@
 package org.apache.drill.exec.store.folio;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties({"asMap"})
-public class Filter implements Serializable {
+public class Filter {
   @JsonIgnore
   private final LinkedHashMap<String, Object> asMap;
 

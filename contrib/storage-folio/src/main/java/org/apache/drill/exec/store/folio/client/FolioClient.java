@@ -2,10 +2,9 @@ package org.apache.drill.exec.store.folio.client;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+// import java.util.ArrayList;
 
-import org.apache.drill.exec.store.folio.client.Login;
-import org.apache.drill.exec.store.folio.raml.ApiField;
+// import org.apache.drill.exec.store.folio.raml.ApiField;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -69,12 +68,12 @@ public class FolioClient {
         return httpclient.execute(request, responseHandler());
     }
 
-    public ArrayList<ApiField> getSchema(String path) throws Exception {
-        if(path.equals("locations")) {
-            return Raml.readSchemaFromRaml("ramls/location.raml", "location");
-        }
-        return null;
-    }
+    // public ArrayList<ApiField> getSchema(String path) throws Exception {
+    //     if(path.equals("locations")) {
+    //         return Raml.readSchemaFromRaml("ramls/location.raml", "location");
+    //     }
+    //     return null;
+    // }
 
     // public final static void main(String[] args) throws Exception {
     //     FolioClient fc = new FolioClient();

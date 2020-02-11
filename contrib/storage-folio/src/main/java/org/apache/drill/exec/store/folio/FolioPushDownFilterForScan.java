@@ -1,7 +1,5 @@
 package org.apache.drill.exec.store.folio;
 
-import java.io.IOException;
-
 import org.apache.drill.common.exceptions.DrillRuntimeException;
 import org.apache.drill.common.expression.LogicalExpression;
 import org.apache.drill.exec.planner.logical.DrillOptiq;

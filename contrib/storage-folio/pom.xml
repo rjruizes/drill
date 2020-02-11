@@ -30,6 +30,34 @@
   <name>contrib/folio-storage-plugin</name>
 
 
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>avoid_bad_dependencies</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <includes>
+                    <!-- Needed by Wiremock for test -->
+                    <include>commons-logging</include>
+                  </includes>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.drill.exec</groupId>
@@ -42,12 +70,13 @@
       <artifactId>jsonld-java</artifactId>
       <version>0.12.5</version>
     </dependency>
+    <!--
     <dependency>
       <groupId>org.raml</groupId>
       <artifactId>webapi-parser</artifactId>
       <version>0.4.0</version>
     </dependency>
-    
+    -->
 
     <dependency>
       <groupId>org.yaml</groupId>
@@ -62,18 +91,18 @@
     </dependency>
 
     <!-- Folio client dependencies -->
-    <dependency>
+    <!-- <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.5.10</version>
-    </dependency>
+    </dependency> -->
 
     <!-- Test dependencies -->
 
     <dependency>
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock-jre8</artifactId>
-      <version>2.23.2</version>
+      <version>2.26.0</version>
       <scope>test</scope>
     </dependency>
 

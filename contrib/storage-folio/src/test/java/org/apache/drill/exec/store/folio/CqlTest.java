@@ -1,7 +1,5 @@
 package org.apache.drill.exec.store.folio;
 
-import static org.junit.Assert.assertEquals;
-
 // import org.z3950.zing.cql.*;
 
 import java.net.MalformedURLException;
@@ -36,11 +34,6 @@ public class CqlTest {
     // CQLNode root = new CQLAndNode(term, sort);
   }
 
-  @Test
-  public void simpleSql() {
-    String inputSql = "SELECT * FROM Customers ORDER BY Country DESC";
-    // expected output = "sortby=-Country"
-  }
   public String sqlToCql(String sql) {
 
     return "";

@@ -100,7 +100,7 @@ public class FolioGroupScan extends AbstractGroupScan {
   }
 
   private void init() {
-    String tableName = folioScanSpec.getTableName();
+    // String tableName = folioScanSpec.getTableName();
     Collection<DrillbitEndpoint> endpoints = folioStoragePlugin.getContext().getBits();
     Map<String,DrillbitEndpoint> endpointMap = Maps.newHashMap();
     for (DrillbitEndpoint endpoint : endpoints) {
@@ -128,21 +128,21 @@ public class FolioGroupScan extends AbstractGroupScan {
   private static class FolioWork implements CompleteWork {
 
     private EndpointByteMapImpl byteMap = new EndpointByteMapImpl();
-    private byte[] partitionKeyStart;
-    private byte[] partitionKeyEnd;
+    // private byte[] partitionKeyStart;
+    // private byte[] partitionKeyEnd;
 
-    public FolioWork(byte[] partitionKeyStart, byte[] partitionKeyEnd) {
-      this.partitionKeyStart = partitionKeyStart;
-      this.partitionKeyEnd = partitionKeyEnd;
-    }
+    // public FolioWork(byte[] partitionKeyStart, byte[] partitionKeyEnd) {
+    //   this.partitionKeyStart = partitionKeyStart;
+    //   this.partitionKeyEnd = partitionKeyEnd;
+    // }
 
-    public byte[] getPartitionKeyStart() {
-      return partitionKeyStart;
-    }
+    // public byte[] getPartitionKeyStart() {
+    //   return partitionKeyStart;
+    // }
 
-    public byte[] getPartitionKeyEnd() {
-      return partitionKeyEnd;
-    }
+    // public byte[] getPartitionKeyEnd() {
+    //   return partitionKeyEnd;
+    // }
 
     @Override
     public long getTotalBytes() {
@@ -198,7 +198,7 @@ public class FolioGroupScan extends AbstractGroupScan {
         1,
         1);
   }
-  
+
   @Override
   public void applyAssignments(List<DrillbitEndpoint> endpoints) throws PhysicalOperatorSetupException {
     // TODO Auto-generated method stub

@@ -16,7 +16,7 @@ import org.apache.http.util.EntityUtils;
 public class Login {
   public static String login(String okapiUrl, String tenant, String user, String pass) throws ClientProtocolException, IOException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
-    
+
     HttpPost httppost = new HttpPost(okapiUrl + "/bl-users/login");
     String inputJson = "{\n" +
     "  \"username\": \""+user+"\",\n" +
@@ -28,7 +28,7 @@ public class Login {
     httppost.setHeader("Accept", "application/json");
     httppost.setHeader("Content-Type", "application/json");
     httppost.setHeader("X-Okapi-Tenant", tenant);
-    
+
     return httpclient.execute(httppost, new ResponseHandler<String>() {
       @Override
       public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {

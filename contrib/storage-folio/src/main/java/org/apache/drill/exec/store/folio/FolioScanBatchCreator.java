@@ -19,7 +19,6 @@ package org.apache.drill.exec.store.folio;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Collections;
 
 import org.apache.drill.common.exceptions.ExecutionSetupException;
 import org.apache.drill.common.expression.SchemaPath;

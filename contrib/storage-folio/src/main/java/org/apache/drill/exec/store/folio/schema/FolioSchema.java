@@ -1,13 +1,8 @@
 package org.apache.drill.exec.store.folio.schema;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.HashSet;
-import java.util.List;
 
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.Table;
@@ -17,17 +12,15 @@ import org.apache.drill.exec.store.AbstractSchema;
 import org.apache.drill.exec.store.folio.FolioScanSpec;
 import org.apache.drill.exec.store.folio.FolioStoragePlugin;
 import org.apache.drill.exec.store.folio.FolioStorageConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableList;
 import org.apache.drill.shaded.guava.com.google.common.collect.Maps;
 
 public class FolioSchema extends AbstractSchema {
 
-  private static final Logger logger = LoggerFactory.getLogger(FolioSchema.class);
+  // private static final Logger logger = LoggerFactory.getLogger(FolioSchema.class);
   private final FolioStoragePlugin plugin;
-  private final Map<String, FolioSubSchema> schemaMap = Maps.newHashMap();
+  // private final Map<String, FolioSubSchema> schemaMap = Maps.newHashMap();
   private final Map<String, DrillTable> drillTables = Maps.newHashMap();
   // private Set<String> tableNames = new HashSet<>(Arrays.asList("locations", "example2"));
 
