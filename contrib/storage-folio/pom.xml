@@ -29,35 +29,6 @@
   <artifactId>drill-folio-storage</artifactId>
   <name>contrib/folio-storage-plugin</name>
 
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>avoid_bad_dependencies</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <bannedDependencies>
-                  <includes>
-                    <!-- Needed by Wiremock for test -->
-                    <include>commons-logging</include>
-                  </includes>
-                </bannedDependencies>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
-  </build>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.drill.exec</groupId>
@@ -101,8 +72,8 @@
 
     <dependency>
       <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock-jre8</artifactId>
-      <version>2.26.0</version>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>${wiremock.standalone.version}</version>
       <scope>test</scope>
     </dependency>
 

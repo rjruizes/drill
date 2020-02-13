@@ -82,9 +82,7 @@ public class FolioRecordReader extends AbstractRecordReader {
     try {
       scanner = new FolioScanner(scanSpec.getTableName(), client, maxRecords, filters);
 
-      System.out.println("tableName: " + scanSpec.getTableName());
       if(!isStarQuery()) {
-        System.out.println("Is NOT a star query");
         List<String> colNames = Lists.newArrayList();
         for (SchemaPath p : this.getColumns()) {
           colNames.add(p.getRootSegmentPath());
@@ -141,7 +139,6 @@ public class FolioRecordReader extends AbstractRecordReader {
       ProjectedColumnInfo pci = new ProjectedColumnInfo();
       pci.vv = vector;
       pci.index = name;
-      System.out.println(name);
       pciBuilder.add(pci);
     }
 
