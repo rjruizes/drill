@@ -119,7 +119,7 @@ public class PcapBatchReader implements ManagedReader<FileSchemaNegotiator> {
 
   private ScalarWriter isCorruptWriter;
 
-  private PcapReaderConfig readerConfig;
+  private final PcapReaderConfig readerConfig;
 
 
   // Writers for TCP Sessions
@@ -155,7 +155,7 @@ public class PcapBatchReader implements ManagedReader<FileSchemaNegotiator> {
 
     public boolean sessionizeTCPStreams;
 
-    private PcapFormatConfig config;
+    private final PcapFormatConfig config;
 
     public PcapReaderConfig(PcapFormatPlugin plugin) {
       this.plugin = plugin;
@@ -178,7 +178,7 @@ public class PcapBatchReader implements ManagedReader<FileSchemaNegotiator> {
     SchemaBuilder builder = new SchemaBuilder();
     Schema pcapSchema = new Schema(readerConfig.sessionizeTCPStreams);
     TupleMetadata schema = pcapSchema.buildSchema(builder);
-    negotiator.setTableSchema(schema, false);
+    negotiator.tableSchema(schema, false);
     ResultSetLoader loader = negotiator.build();
 
     // Creates writers for all fields (Since schema is known)
@@ -406,8 +406,19 @@ public class PcapBatchReader implements ManagedReader<FileSchemaNegotiator> {
     srcMacAddressWriter.setString(packet.getEthernetSource());
     dstMacAddressWriter.setString(packet.getEthernetDestination());
 
-    dstIPWriter.setString(packet.getDst_ip().getHostAddress());
-    srcIPWriter.setString(packet.getSrc_ip().getHostAddress());
+    String destinationIp = packet.getDestinationIpAddressString();
+    if (destinationIp == null) {
+      dstIPWriter.setNull();
+    } else {
+      dstIPWriter.setString(destinationIp);
+    }
+
+    String sourceIp = packet.getSourceIpAddressString();
+    if (sourceIp == null) {
+      srcIPWriter.setNull();
+    } else {
+      srcIPWriter.setString(sourceIp);
+    }
     srcPortWriter.setInt(packet.getSrc_port());
     dstPortWriter.setInt(packet.getDst_port());
     packetLengthWriter.setInt(packet.getPacketLength());

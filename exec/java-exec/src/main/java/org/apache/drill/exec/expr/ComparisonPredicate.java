@@ -17,11 +17,11 @@
  */
 package org.apache.drill.exec.expr;
 
+import org.apache.drill.common.FunctionNames;
 import org.apache.drill.common.expression.LogicalExpression;
 import org.apache.drill.common.expression.LogicalExpressionBase;
 import org.apache.drill.common.expression.visitors.ExprVisitor;
 import org.apache.drill.common.types.TypeProtos;
-import org.apache.drill.exec.expr.fn.FunctionGenerationHelper;
 import org.apache.drill.exec.expr.stat.RowsMatch;
 import org.apache.drill.metastore.statistics.ColumnStatistics;
 import org.apache.drill.metastore.statistics.ColumnStatisticsKind;
@@ -88,11 +88,11 @@ public class ComparisonPredicate<C extends Comparable<C>> extends LogicalExpress
   @Override
   @SuppressWarnings("unchecked")
   public RowsMatch matches(StatisticsProvider<C> evaluator) {
-    ColumnStatistics leftStat = left.accept(evaluator, null);
+    ColumnStatistics<C> leftStat = (ColumnStatistics<C>) left.accept(evaluator, null);
     if (IsPredicate.isNullOrEmpty(leftStat)) {
       return RowsMatch.SOME;
     }
-    ColumnStatistics rightStat = right.accept(evaluator, null);
+    ColumnStatistics<C> rightStat = (ColumnStatistics<C>) right.accept(evaluator, null);
     if (IsPredicate.isNullOrEmpty(rightStat)) {
       return RowsMatch.SOME;
     }
@@ -112,9 +112,11 @@ public class ComparisonPredicate<C extends Comparable<C>> extends LogicalExpress
       int leftScale = left.getMajorType().getScale();
       int rightScale = right.getMajorType().getScale();
       if (leftScale > rightScale) {
-        rightStat = adjustDecimalStatistics(rightStat, leftScale - rightScale);
+        rightStat = (ColumnStatistics<C>) adjustDecimalStatistics(
+            (ColumnStatistics<BigInteger>) rightStat, leftScale - rightScale);
       } else if (leftScale < rightScale) {
-        leftStat = adjustDecimalStatistics(leftStat, rightScale - leftScale);
+        leftStat = (ColumnStatistics<C>) adjustDecimalStatistics(
+            (ColumnStatistics<BigInteger>) leftStat, rightScale - leftScale);
       }
     }
     return predicate.apply(leftStat, rightStat);
@@ -127,7 +129,7 @@ public class ComparisonPredicate<C extends Comparable<C>> extends LogicalExpress
    * @param scale adjustment scale
    * @return adjusted statistics
    */
-  private ColumnStatistics adjustDecimalStatistics(ColumnStatistics<BigInteger> statistics, int scale) {
+  private ColumnStatistics<BigInteger> adjustDecimalStatistics(ColumnStatistics<BigInteger> statistics, int scale) {
     BigInteger min = new BigDecimal(ColumnStatisticsKind.MIN_VALUE.getValueStatistic(statistics))
         .setScale(scale, RoundingMode.HALF_UP).unscaledValue();
     BigInteger max = new BigDecimal(ColumnStatisticsKind.MAX_VALUE.getValueStatistic(statistics))
@@ -139,7 +141,7 @@ public class ComparisonPredicate<C extends Comparable<C>> extends LogicalExpress
   /**
    * If one rowgroup contains some null values, change the RowsMatch.ALL into RowsMatch.SOME (null values should be discarded by filter)
    */
-  private static RowsMatch checkNull(ColumnStatistics leftStat, ColumnStatistics rightStat) {
+  private static RowsMatch checkNull(ColumnStatistics<?> leftStat, ColumnStatistics<?> rightStat) {
     return !IsPredicate.hasNoNulls(leftStat) || !IsPredicate.hasNoNulls(rightStat) ? RowsMatch.SOME : RowsMatch.ALL;
   }
 
@@ -256,17 +258,17 @@ public class ComparisonPredicate<C extends Comparable<C>> extends LogicalExpress
   public static <C extends Comparable<C>> LogicalExpression createComparisonPredicate(
       String function, LogicalExpression left, LogicalExpression right) {
     switch (function) {
-      case FunctionGenerationHelper.EQ:
+      case FunctionNames.EQ:
         return ComparisonPredicate.<C>createEqualPredicate(left, right);
-      case FunctionGenerationHelper.GT:
+      case FunctionNames.GT:
         return ComparisonPredicate.<C>createGTPredicate(left, right);
-      case FunctionGenerationHelper.GE:
+      case FunctionNames.GE:
         return ComparisonPredicate.<C>createGEPredicate(left, right);
-      case FunctionGenerationHelper.LT:
+      case FunctionNames.LT:
         return ComparisonPredicate.<C>createLTPredicate(left, right);
-      case FunctionGenerationHelper.LE:
+      case FunctionNames.LE:
         return ComparisonPredicate.<C>createLEPredicate(left, right);
-      case FunctionGenerationHelper.NE:
+      case FunctionNames.NE:
         return ComparisonPredicate.<C>createNEPredicate(left, right);
       default:
         return null;

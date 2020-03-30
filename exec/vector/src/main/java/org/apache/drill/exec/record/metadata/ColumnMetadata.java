@@ -59,6 +59,20 @@ public interface ColumnMetadata extends Propertied {
   String BLANK_AS_PROP = DRILL_PROP_PREFIX + "blank-as";
 
   /**
+   * Convert blanks to null values (if the column is nullable), or
+   * fill with the default value (non-nullable.)
+   */
+  String BLANK_AS_NULL = "null";
+
+  /**
+   * Convert blanks for numeric fields to 0. For non-numeric
+   * fields, convert to null (for nullable) or the default value
+   * (for non-nullable). Works best if non-numeric fields are declared
+   * as nullable.
+   */
+  String BLANK_AS_ZERO = "0";
+
+  /**
    * Indicates whether to project the column in a wildcard (*) query.
    * Special columns may be excluded from projection. Certain "special"
    * columns may be available only when explicitly requested. For example,
@@ -73,6 +87,8 @@ public interface ColumnMetadata extends Propertied {
    */
   String EXCLUDE_FROM_WILDCARD = DRILL_PROP_PREFIX + "special";
 
+  int DEFAULT_ARRAY_SIZE = 10;
+
   /**
    * Rough characterization of Drill types into metadata categories.
    * Various aspects of Drill's type system are very, very messy.
@@ -81,27 +97,23 @@ public interface ColumnMetadata extends Propertied {
    * the messy type system while staying close to the underlying
    * implementation.
    */
-
   enum StructureType {
 
     /**
      * Primitive column (all types except List, Map and Union.)
      * Includes (one-dimensional) arrays of those types.
      */
-
     PRIMITIVE,
 
     /**
      * Map or repeated map. Also describes the row as a whole.
      */
-
     TUPLE,
 
     /**
      * Union or (non-repeated) list. (A non-repeated list is,
      * essentially, a repeated union.)
      */
-
     VARIANT,
 
     /**
@@ -117,11 +129,13 @@ public interface ColumnMetadata extends Propertied {
      * a separate category for 1D lists. But, again, that is not how
      * the code has evolved.
      */
+    MULTI_ARRAY,
 
-    MULTI_ARRAY
+    /**
+     * Dict or repeated dict.
+     */
+    DICT
   }
-
-  int DEFAULT_ARRAY_SIZE = 10;
 
   StructureType structureType();
 
@@ -130,15 +144,13 @@ public interface ColumnMetadata extends Propertied {
    *
    * @return the tuple schema
    */
-
-  TupleMetadata mapSchema();
+  TupleMetadata tupleSchema();
 
   /**
    * Schema for <tt>VARIANT</tt> columns.
    *
    * @return the variant schema
    */
-
   VariantMetadata variantSchema();
 
   /**
@@ -154,7 +166,6 @@ public interface ColumnMetadata extends Propertied {
    *
    * @return the description of the (n-1) st dimension.
    */
-
   ColumnMetadata childSchema();
   MaterializedField schema();
   MaterializedField emptySchema();
@@ -177,7 +188,6 @@ public interface ColumnMetadata extends Propertied {
    *
    * @return true if the column is of type LIST of UNIONs
    */
-
   boolean isMultiList();
 
   /**
@@ -185,7 +195,6 @@ public interface ColumnMetadata extends Propertied {
    * if they have the same name, type and structure (ignoring internal structure
    * such as offset vectors.)
    */
-
   boolean isEquivalent(ColumnMetadata other);
 
   /**
@@ -194,7 +203,6 @@ public interface ColumnMetadata extends Propertied {
    *
    * @param width the expected column width
    */
-
   void setExpectedWidth(int width);
 
   /**
@@ -204,7 +212,6 @@ public interface ColumnMetadata extends Propertied {
    * @return the expected column width of the each data value. Does not include
    * "overhead" space such as for the null-value vector or offset vector
    */
-
   int expectedWidth();
 
   /**
@@ -214,7 +221,6 @@ public interface ColumnMetadata extends Propertied {
    * @param childCount the expected average array cardinality. Defaults to
    * 1 for non-array columns, 10 for array columns
    */
-
   void setExpectedElementCount(int childCount);
 
   /**
@@ -224,7 +230,6 @@ public interface ColumnMetadata extends Propertied {
    * @return the expected value cardinality per value (per-row for top-level
    * columns, per array element for arrays within lists)
    */
-
   int expectedElementCount();
 
   void setFormat(String value);
@@ -275,7 +280,6 @@ public interface ColumnMetadata extends Propertied {
    *
    * @return empty clone of this column
    */
-
   ColumnMetadata cloneEmpty();
 
   int precision();

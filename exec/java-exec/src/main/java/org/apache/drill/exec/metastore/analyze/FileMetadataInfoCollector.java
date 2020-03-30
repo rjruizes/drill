@@ -128,6 +128,7 @@ public class FileMetadataInfoCollector implements MetadataInfoCollector {
     List<SchemaPath> metastoreInterestingColumns =
         Optional.ofNullable(basicRequests.interestingColumnsAndPartitionKeys(tableInfo).interestingColumns())
             .map(metastoreInterestingColumnNames -> metastoreInterestingColumnNames.stream()
+                // interesting column names are escaped, so SchemaPath.parseFromString() should be used here
                 .map(SchemaPath::parseFromString)
                 .collect(Collectors.toList()))
         .orElse(null);
@@ -154,7 +155,8 @@ public class FileMetadataInfoCollector implements MetadataInfoCollector {
     String selectionRoot = selection.getSelection().getSelectionRoot().toUri().getPath();
 
     if (!Objects.equals(metastoreInterestingColumns, interestingColumns)
-        && (metastoreInterestingColumns == null || !metastoreInterestingColumns.containsAll(interestingColumns))
+        && metastoreInterestingColumns != null &&
+        (interestingColumns == null || !metastoreInterestingColumns.containsAll(interestingColumns))
         || TableStatisticsKind.ANALYZE_METADATA_LEVEL.getValue(basicRequests.tableMetadata(tableInfo)).compareTo(metadataLevel) != 0) {
       // do not update table scan and lists of segments / files / row groups,
       // metadata should be recalculated

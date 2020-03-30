@@ -17,7 +17,11 @@
  */
 package org.apache.drill.exec.store.parquet;
 
-import org.apache.drill.exec.metastore.ParquetMetadataProvider;
+import org.apache.drill.exec.metastore.MetadataProviderManager;
+import org.apache.drill.exec.metastore.store.parquet.ParquetMetadataProvider;
+import org.apache.drill.exec.metastore.store.parquet.ParquetMetadataProviderBuilder;
+import org.apache.drill.exec.record.metadata.schema.SchemaProvider;
+import org.apache.drill.exec.store.dfs.FileSelection;
 import org.apache.drill.metastore.metadata.LocationProvider;
 import org.apache.drill.metastore.metadata.MetadataInfo;
 import org.apache.drill.metastore.metadata.MetadataType;
@@ -51,6 +55,8 @@ import org.apache.drill.metastore.metadata.PartitionMetadata;
 import org.apache.drill.metastore.metadata.RowGroupMetadata;
 import org.apache.drill.metastore.metadata.BaseTableMetadata;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,11 +79,12 @@ import static org.apache.drill.exec.store.parquet.ParquetTableMetadataUtils.PARQ
  * parquet statistics.
  */
 public abstract class BaseParquetMetadataProvider implements ParquetMetadataProvider {
+  private static final Logger logger = LoggerFactory.getLogger(BaseParquetMetadataProvider.class);
 
   /**
    * {@link HashBasedTable} cannot contain nulls, used this object to represent null values.
    */
-  static final Object NULL_VALUE = new Object();
+  public static final Object NULL_VALUE = new Object();
 
   protected final List<ReadEntryWithPath> entries;
   protected final ParquetReaderConfig readerConfig;
@@ -103,34 +110,40 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
   // whether metadata for row groups should be collected to create files, partitions and table metadata
   private final boolean collectMetadata = false;
 
-  public BaseParquetMetadataProvider(List<ReadEntryWithPath> entries,
-                                     ParquetReaderConfig readerConfig,
-                                     String tableName,
-                                     Path tableLocation,
-                                     TupleMetadata schema,
-                                     DrillStatsTable statsTable) {
-    this(readerConfig, entries, tableName, tableLocation, schema, statsTable);
-  }
+  protected BaseParquetMetadataProvider(Builder<?> builder) {
+    if (builder.entries != null) {
+      // reuse previously stored metadata
+      this.entries = builder.entries;
+      this.tableName = builder.selectionRoot != null ? builder.selectionRoot.toUri().getPath() : "";
+      this.tableLocation = builder.selectionRoot;
+    } else if (builder.selection != null) {
+      this.entries = new ArrayList<>();
+      this.tableName = builder.selection.getSelectionRoot() != null ? builder.selection.getSelectionRoot().toUri().getPath() : "";
+      this.tableLocation = builder.selection.getSelectionRoot();
+    } else {
+      // case of hive parquet table
+      this.entries = new ArrayList<>();
+      this.tableName = null;
+      this.tableLocation = null;
+    }
 
-  public BaseParquetMetadataProvider(ParquetReaderConfig readerConfig,
-                                     List<ReadEntryWithPath> entries,
-                                     String tableName,
-                                     Path tableLocation,
-                                     TupleMetadata schema,
-                                     DrillStatsTable statsTable) {
-    this.entries = entries == null ? new ArrayList<>() : entries;
-    this.readerConfig = readerConfig == null ? ParquetReaderConfig.getDefaultInstance() : readerConfig;
-    this.tableName = tableName;
-    this.tableLocation = tableLocation;
+    SchemaProvider schemaProvider = builder.metadataProviderManager.getSchemaProvider();
+    TupleMetadata schema = builder.schema;
+    // schema passed into the builder has greater priority
+    if (schema == null && schemaProvider != null) {
+      try {
+        schema = schemaProvider.read().getSchema();
+      } catch (IOException e) {
+        logger.warn("Unable to read schema from schema provider [{}]: {}.\n" +
+                "Query execution will continue without using the schema.",
+            tableLocation, e.getMessage());
+        logger.trace("Error when reading the schema", e);
+      }
+    }
+
+    this.readerConfig = builder.readerConfig == null ? ParquetReaderConfig.getDefaultInstance() : builder.readerConfig;
     this.schema = schema;
-    this.statsTable = statsTable;
-  }
-
-  public BaseParquetMetadataProvider(List<ReadEntryWithPath> entries, ParquetReaderConfig readerConfig) {
-    this.entries = entries == null ? new ArrayList<>() : entries;
-    this.readerConfig = readerConfig == null ? ParquetReaderConfig.getDefaultInstance() : readerConfig;
-    this.tableName = null;
-    this.tableLocation = null;
+    this.statsTable = builder.metadataProviderManager.getStatsProvider();
   }
 
   protected void init(BaseParquetMetadataProvider metadataProvider) throws IOException {
@@ -207,7 +220,7 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
   @Override
   public TableMetadata getTableMetadata() {
     if (tableMetadata == null) {
-      List<StatisticsHolder> tableStatistics = new ArrayList<>(DrillStatsTable.getEstimatedTableStats(statsTable));
+      List<StatisticsHolder<?>> tableStatistics = new ArrayList<>(DrillStatsTable.getEstimatedTableStats(statsTable));
       Map<SchemaPath, TypeProtos.MajorType> fields = ParquetTableMetadataUtils.resolveFields(parquetTableMetadata);
       Map<SchemaPath, TypeProtos.MajorType> intermediateFields = ParquetTableMetadataUtils.resolveIntermediateFields(parquetTableMetadata);
 
@@ -223,7 +236,7 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
         });
       }
 
-      Map<SchemaPath, ColumnStatistics> columnsStatistics;
+      Map<SchemaPath, ColumnStatistics<?>> columnsStatistics;
       if (collectMetadata) {
         Collection<? extends BaseMetadata> metadata = getFilesMetadataMap().values();
         if (metadata.isEmpty()) {
@@ -243,18 +256,18 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
         fields.forEach((columnPath, value) -> {
           long columnValueCount = getParquetGroupScanStatistics().getColumnValueCount(columnPath);
           // Adds statistics values itself if statistics is available
-          List<StatisticsHolder> stats = new ArrayList<>(DrillStatsTable.getEstimatedColumnStats(statsTable, columnPath));
+          List<StatisticsHolder<?>> stats = new ArrayList<>(DrillStatsTable.getEstimatedColumnStats(statsTable, columnPath));
           unhandledColumns.remove(columnPath);
 
           // adds statistics for partition columns
           stats.add(new StatisticsHolder<>(columnValueCount, TableStatisticsKind.ROW_COUNT));
           stats.add(new StatisticsHolder<>(getParquetGroupScanStatistics().getRowCount() - columnValueCount, ColumnStatisticsKind.NULLS_COUNT));
-          columnsStatistics.put(columnPath, new ColumnStatistics(stats, value.getMinorType()));
+          columnsStatistics.put(columnPath, new ColumnStatistics<>(stats, value.getMinorType()));
         });
 
         for (SchemaPath column : unhandledColumns) {
           columnsStatistics.put(column,
-              new ColumnStatistics(DrillStatsTable.getEstimatedColumnStats(statsTable, column)));
+              new ColumnStatistics<>(DrillStatsTable.getEstimatedColumnStats(statsTable, column)));
         }
       }
       MetadataInfo metadataInfo = MetadataInfo.builder().type(MetadataType.TABLE).build();
@@ -327,9 +340,9 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
           partitionPaths.forEach((path, value) -> partitionsForValue.put(value, path));
 
           partitionsForValue.asMap().forEach((partitionKey, value) -> {
-            Map<SchemaPath, ColumnStatistics> columnsStatistics = new HashMap<>();
+            Map<SchemaPath, ColumnStatistics<?>> columnsStatistics = new HashMap<>();
 
-            List<StatisticsHolder> statistics = new ArrayList<>();
+            List<StatisticsHolder<?>> statistics = new ArrayList<>();
             partitionKey = partitionKey == NULL_VALUE ? null : partitionKey;
             statistics.add(new StatisticsHolder<>(partitionKey, ColumnStatisticsKind.MIN_VALUE));
             statistics.add(new StatisticsHolder<>(partitionKey, ColumnStatisticsKind.MAX_VALUE));
@@ -381,6 +394,7 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
         .collect(Collectors.toList());
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Map<Path, SegmentMetadata> getSegmentsMetadataMap() {
     if (segments == null) {
@@ -456,7 +470,7 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
    */
   private static <T extends BaseMetadata & LocationProvider> SegmentMetadata combineToSegmentMetadata(Collection<T> metadataList,
       SchemaPath column, Set<Path> metadataLocations) {
-    List<StatisticsHolder> segmentStatistics =
+    List<StatisticsHolder<?>> segmentStatistics =
         Collections.singletonList(
             new StatisticsHolder<>(
                 TableStatisticsKind.ROW_COUNT.mergeStatistics(metadataList),
@@ -545,4 +559,67 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
   }
 
   protected abstract void initInternal() throws IOException;
+
+  public static abstract class Builder<T extends Builder<T>> implements ParquetMetadataProviderBuilder<T> {
+    private final MetadataProviderManager metadataProviderManager;
+
+    private List<ReadEntryWithPath> entries;
+    private Path selectionRoot;
+    private ParquetReaderConfig readerConfig;
+    private TupleMetadata schema;
+
+    private FileSelection selection;
+
+    public Builder(MetadataProviderManager source) {
+      this.metadataProviderManager = source;
+    }
+
+    @Override
+    public T withEntries(List<ReadEntryWithPath> entries) {
+      this.entries = entries;
+      return self();
+    }
+
+    @Override
+    public T withSelectionRoot(Path selectionRoot) {
+      this.selectionRoot = selectionRoot;
+      return self();
+    }
+
+    @Override
+    public T withReaderConfig(ParquetReaderConfig readerConfig) {
+      this.readerConfig = readerConfig;
+      return self();
+    }
+
+    @Override
+    public T withSelection(FileSelection selection) {
+      this.selection = selection;
+      return self();
+    }
+
+    @Override
+    public T withSchema(TupleMetadata schema) {
+      this.schema = schema;
+      return self();
+    }
+
+    protected abstract T self();
+
+    public Path selectionRoot() {
+      return selectionRoot;
+    }
+
+    public FileSelection selection() {
+      return selection;
+    }
+
+    public MetadataProviderManager metadataProviderManager() {
+      return metadataProviderManager;
+    }
+
+    public List<ReadEntryWithPath> entries() {
+      return entries;
+    }
+  }
 }

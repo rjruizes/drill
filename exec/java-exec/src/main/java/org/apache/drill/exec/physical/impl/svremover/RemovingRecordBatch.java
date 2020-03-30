@@ -18,20 +18,22 @@
 package org.apache.drill.exec.physical.impl.svremover;
 
 import org.apache.drill.exec.exception.OutOfMemoryException;
-import org.apache.drill.exec.exception.SchemaChangeException;
 import org.apache.drill.exec.ops.FragmentContext;
 import org.apache.drill.exec.physical.config.SelectionVectorRemover;
 import org.apache.drill.exec.record.AbstractSingleRecordBatch;
 import org.apache.drill.exec.record.BatchSchema.SelectionVectorMode;
 import org.apache.drill.exec.record.RecordBatch;
 import org.apache.drill.exec.record.WritableBatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RemovingRecordBatch extends AbstractSingleRecordBatch<SelectionVectorRemover>{
-  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RemovingRecordBatch.class);
+  private static final Logger logger = LoggerFactory.getLogger(RemovingRecordBatch.class);
 
   private Copier copier;
 
-  public RemovingRecordBatch(SelectionVectorRemover popConfig, FragmentContext context, RecordBatch incoming) throws OutOfMemoryException {
+  public RemovingRecordBatch(SelectionVectorRemover popConfig, FragmentContext context,
+      RecordBatch incoming) throws OutOfMemoryException {
     super(popConfig, context, incoming);
     logger.debug("Created.");
   }
@@ -42,7 +44,7 @@ public class RemovingRecordBatch extends AbstractSingleRecordBatch<SelectionVect
   }
 
   @Override
-  protected boolean setupNewSchema() throws SchemaChangeException {
+  protected boolean setupNewSchema() {
     // Don't clear off container just because an OK_NEW_SCHEMA was received from
     // upstream. For cases when there is just
     // change in container type but no actual schema change, RemovingRecordBatch

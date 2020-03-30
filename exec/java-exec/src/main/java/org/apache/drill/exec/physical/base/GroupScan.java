@@ -37,7 +37,7 @@ import org.apache.hadoop.fs.Path;
 
 /**
  * A GroupScan operator represents all data which will be scanned by a given physical
- * plan.  It is the superset of all SubScans for the plan.
+ * plan. It is the superset of all SubScans for the plan.
  */
 public interface GroupScan extends Scan, HasAffinity {
 
@@ -188,4 +188,13 @@ public interface GroupScan extends Scan, HasAffinity {
    */
   @JsonIgnore
   AnalyzeInfoProvider getAnalyzeInfoProvider();
+
+  /**
+   * Checks whether this group scan supports filter push down.
+   *
+   * @return {@code true} if this group scan supports filter push down,
+   * {@code false} otherwise
+   */
+  @JsonIgnore
+  boolean supportsFilterPushDown();
 }

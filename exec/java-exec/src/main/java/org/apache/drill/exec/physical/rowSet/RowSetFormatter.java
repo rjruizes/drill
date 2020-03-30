@@ -116,18 +116,18 @@ public class RowSetFormatter {
   }
 
   private void writeHeader(Writer writer, RowSetReader reader, SelectionVectorMode selectionMode) throws IOException {
-    writer.write(Integer.toString(reader.logicalIndex()));
+    writer.write(String.valueOf(reader.logicalIndex()));
     switch (selectionMode) {
       case FOUR_BYTE:
         writer.write(" (");
-        writer.write(reader.hyperVectorIndex());
+        writer.write(String.valueOf(reader.hyperVectorIndex()));
         writer.write(", ");
-        writer.write(Integer.toString(reader.offset()));
+        writer.write(String.valueOf(reader.offset()));
         writer.write(")");
         break;
       case TWO_BYTE:
         writer.write(" (");
-        writer.write(Integer.toString(reader.offset()));
+        writer.write(String.valueOf(reader.offset()));
         writer.write(")");
         break;
       default:

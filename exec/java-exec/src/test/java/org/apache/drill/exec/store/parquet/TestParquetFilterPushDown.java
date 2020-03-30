@@ -108,7 +108,7 @@ public class TestParquetFilterPushDown extends PlanTestBase {
   };
 
   @Test
-  // Test filter evaluation directly without go through SQL queries.
+  // Test filter evaluation directly without going through SQL queries.
   public void testIntPredicateWithEval() throws Exception {
     // intTbl.parquet has only one int column
     //    intCol : [0, 100].
@@ -150,7 +150,6 @@ public class TestParquetFilterPushDown extends PlanTestBase {
     testParquetRowGroupFilterEval(footer, "intCol = 50 or intCol = 160", RowsMatch.SOME);
 
     //"nonExistCol" does not exist in the table. "AND" with a filter on exist column
-
     testParquetRowGroupFilterEval(footer, "intCol > 100 and nonExistCol = 100", RowsMatch.NONE);
     testParquetRowGroupFilterEval(footer, "intCol > 50 and nonExistCol = 100", RowsMatch.NONE); // since nonExistCol = 100 -> Unknown -> could drop.
     testParquetRowGroupFilterEval(footer, "nonExistCol = 100 and intCol > 50", RowsMatch.NONE); // since nonExistCol = 100 -> Unknown -> could drop.
@@ -162,7 +161,6 @@ public class TestParquetFilterPushDown extends PlanTestBase {
     // is ignored.
 
     //"nonExistCol" does not exist in the table. "OR" with a filter on exist column
-
     testParquetRowGroupFilterEval(footer, "intCol > 100 or nonExistCol = 100", RowsMatch.NONE); // nonExistCol = 100 -> could drop.
     testParquetRowGroupFilterEval(footer, "nonExistCol = 100 or intCol > 100", RowsMatch.NONE); // nonExistCol = 100 -> could drop.
 
@@ -608,13 +606,13 @@ public class TestParquetFilterPushDown extends PlanTestBase {
     Mockito.when(booleanStatistics.get(ColumnStatisticsKind.MIN_VALUE)).thenReturn(false); // min false
     Mockito.when(booleanStatistics.get(ColumnStatisticsKind.MAX_VALUE)).thenReturn(true); // max true
     Mockito.when(booleanStatistics.getValueComparator()).thenReturn(Comparator.nullsFirst(Comparator.naturalOrder())); // comparator
-    IsPredicate isTrue = (IsPredicate) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_TRUE, le);
+    IsPredicate<Boolean> isTrue = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_TRUE, le);
     assertEquals(RowsMatch.SOME, isTrue.matches(re));
-    IsPredicate isFalse = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_FALSE, le);
+    IsPredicate<Boolean> isFalse = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_FALSE, le);
     assertEquals(RowsMatch.SOME, isFalse.matches(re));
-    IsPredicate isNotTrue = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_TRUE, le);
+    IsPredicate<Boolean> isNotTrue = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_TRUE, le);
     assertEquals(RowsMatch.SOME, isNotTrue.matches(re));
-    IsPredicate isNotFalse = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_FALSE, le);
+    IsPredicate<Boolean> isNotFalse = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_FALSE, le);
     assertEquals(RowsMatch.SOME, isNotFalse.matches(re));
   }
 
@@ -631,13 +629,13 @@ public class TestParquetFilterPushDown extends PlanTestBase {
     Mockito.when(booleanStatistics.get(ColumnStatisticsKind.MIN_VALUE)).thenReturn(false); // min false
     Mockito.when(booleanStatistics.get(ColumnStatisticsKind.MAX_VALUE)).thenReturn(false); // max false
     Mockito.when(booleanStatistics.getValueComparator()).thenReturn(Comparator.nullsFirst(Comparator.naturalOrder())); // comparator
-    IsPredicate isTrue = (IsPredicate) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_TRUE, le);
+    IsPredicate<Boolean> isTrue = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_TRUE, le);
     assertEquals(RowsMatch.NONE, isTrue.matches(re));
-    IsPredicate isFalse = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_FALSE, le);
+    IsPredicate<Boolean> isFalse = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_FALSE, le);
     assertEquals(RowsMatch.ALL, isFalse.matches(re));
-    IsPredicate isNotTrue = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_TRUE, le);
+    IsPredicate<Boolean> isNotTrue = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_TRUE, le);
     assertEquals(RowsMatch.ALL, isNotTrue.matches(re));
-    IsPredicate isNotFalse = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_FALSE, le);
+    IsPredicate<Boolean> isNotFalse = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_FALSE, le);
     assertEquals(RowsMatch.NONE, isNotFalse.matches(re));
   }
 
@@ -653,13 +651,13 @@ public class TestParquetFilterPushDown extends PlanTestBase {
     Mockito.when(booleanStatistics.get(ColumnStatisticsKind.NULLS_COUNT)).thenReturn(0L); // no nulls
     Mockito.when(booleanStatistics.get(ColumnStatisticsKind.MIN_VALUE)).thenReturn(true); // min false
     Mockito.when(booleanStatistics.get(ColumnStatisticsKind.MAX_VALUE)).thenReturn(true); // max false
-    IsPredicate isTrue = (IsPredicate) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_TRUE, le);
+    IsPredicate<Boolean> isTrue = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_TRUE, le);
     assertEquals(RowsMatch.ALL, isTrue.matches(re));
-    IsPredicate isFalse = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_FALSE, le);
+    IsPredicate<Boolean> isFalse = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_FALSE, le);
     assertEquals(RowsMatch.NONE, isFalse.matches(re));
-    IsPredicate isNotTrue = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_TRUE, le);
+    IsPredicate<Boolean> isNotTrue = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_TRUE, le);
     assertEquals(RowsMatch.NONE, isNotTrue.matches(re));
-    IsPredicate isNotFalse = (IsPredicate)  IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_FALSE, le);
+    IsPredicate<Boolean> isNotFalse = (IsPredicate<Boolean>) IsPredicate.createIsPredicate(FunctionGenerationHelper.IS_NOT_FALSE, le);
     assertEquals(RowsMatch.ALL, isNotFalse.matches(re));
   }
 
@@ -726,6 +724,7 @@ public class TestParquetFilterPushDown extends PlanTestBase {
       runAndCheckResults(client, sql, expectedRows, numPartitions, numPruned);
     }
   }
+
   /**
    * Test runtime pruning
    *
@@ -757,5 +756,4 @@ public class TestParquetFilterPushDown extends PlanTestBase {
     long resultNumPruned = parquestScan0.getMetric(ParquetRecordReader.Metric.ROWGROUPS_PRUNED.ordinal());
     assertEquals(numPruned,resultNumPruned);
   }
-
 }
