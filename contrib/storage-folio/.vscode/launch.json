@@ -2,10 +2,11 @@
   "configurations": [
     {
       "type": "java",
-      "name": "CodeLens (Launch) - FolioClient",
-      "request": "launch",
-      "mainClass": "org.apache.drill.exec.store.folio.client.FolioClient",
-      "projectName": "drill-folio-storage"
-    }
+      "name": "Debug (Attach)",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "preLaunchTask": "mvnDebug"
+  }
   ]
 }

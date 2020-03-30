@@ -13,3 +13,15 @@ cp bootstrap-storage-plugins.sample.json bootstrap-storage-plugins.json
 ```
 
 And supply a password in bootstrap-storage-plugins.json
+
+### Pushdown filters
+
+The following SQL operations are pushed down into CQL:
+- `WHERE`
+- `AND`
+- `OR`
+- `=`
+
+The following are not:
+- `ORDER BY` is not pushed down; apparently no option to. It is done by Drill client-side.
+- `>`, `>=`, `<`, `<=` have not been tested

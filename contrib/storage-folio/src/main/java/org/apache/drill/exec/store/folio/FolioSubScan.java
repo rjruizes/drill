@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableSet;
+import org.z3950.zing.cql.CQLNode;
 import org.apache.drill.common.expression.SchemaPath;
 import org.apache.drill.common.exceptions.ExecutionSetupException;
 import org.apache.drill.exec.store.StoragePluginRegistry;
@@ -94,11 +95,11 @@ public class FolioSubScan extends AbstractSubScan {
 
   public static class FolioSubScanSpec {
     private final String tableName;
-    private Filter filters;
+    private CQLNode filters;
 
     @JsonCreator
     public FolioSubScanSpec(@JsonProperty("tableName") String tableName,
-      @JsonProperty("filters") Filter filters) {
+      @JsonProperty("filters") CQLNode filters) {
       this.tableName = tableName;
       this.filters = filters;
     }
@@ -106,7 +107,7 @@ public class FolioSubScan extends AbstractSubScan {
     public String getTableName() {
       return tableName;
     }
-    public Filter getFilters() {
+    public CQLNode getFilters() {
       return filters;
     }
   }

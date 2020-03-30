@@ -61,6 +61,12 @@
       <version>3.4</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.z3950.zing</groupId>
+      <artifactId>cql-java</artifactId>
+      <version>1.13</version>
+    </dependency>
+
     <!-- Folio client dependencies -->
     <!-- <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -111,6 +117,12 @@
     <repository>
       <id>MuleSoftReleases</id>
       <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases</url>
+    </repository>
+
+    <repository>
+      <id>indexdata</id>
+      <name>Index Data</name>
+      <url>http://maven.indexdata.com/</url>
     </repository>
 
     <repository>

@@ -41,6 +41,7 @@ import org.apache.drill.exec.vector.ValueVector;
 
 import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableList;
 import org.apache.drill.shaded.guava.com.google.common.collect.Lists;
+import org.z3950.zing.cql.CQLNode;
 
 public class FolioRecordReader extends AbstractRecordReader {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FolioRecordReader.class);
@@ -56,7 +57,7 @@ public class FolioRecordReader extends AbstractRecordReader {
   // private OperatorContext context;
   // private boolean hasBeenRead = false;
   private int maxRecords = -1;
-  private Filter filters;
+  private CQLNode filters;
 
   private static class ProjectedColumnInfo {
     String index;

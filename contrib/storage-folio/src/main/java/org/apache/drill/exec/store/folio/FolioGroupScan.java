@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.drill.shaded.guava.com.google.common.collect.Lists;
 import org.apache.drill.shaded.guava.com.google.common.collect.Maps;
+import org.z3950.zing.cql.CQLNode;
 import org.apache.drill.shaded.guava.com.google.common.base.Preconditions;
 
 import org.apache.drill.exec.physical.EndpointAffinity;
@@ -227,7 +228,7 @@ public class FolioGroupScan extends AbstractGroupScan {
     return getFolioScanSpec().getTableName();
   }
   @JsonIgnore
-  public Filter getFilters() {
+  public CQLNode getFilters() {
     return getFolioScanSpec().getFilters();
   }
 

@@ -1,13 +1,85 @@
 {
-  "request": {
-      "method": "GET",
-      "url": "/locations"
-  },
-  "response": {
-      "status": 200,
-      "bodyFileName": "get-locations.json",
-      "headers": {
-          "Content-Type": "application/json"
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "limit": {
+            "equalTo": "100"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "bodyFileName": "get-locations-default.json",
+        "headers": {
+            "Content-Type": "application/json"
+        }
       }
-  }
+    },
+
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "limit": {
+            "equalTo": "3"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "bodyFileName": "get-locations-limit-3.json",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "limit": {
+            "equalTo": "100"
+          },
+          "query": {
+            "equalTo": "id+%3D+%22758258bc-ecc1-41b8-abca-f7b610822ffd%22"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "bodyFileName": "get-locations-single.json",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "limit": {
+            "equalTo": "100"
+          },
+          "query": {
+            "equalTo": "%2528id%2B%253D%2B758258bc-ecc1-41b8-abca-f7b610822ffd%2529%2Band%2B%2528name%2B%253D%2B%2522ORWIG%2BETHNO%2BCD%2522%2529"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "bodyFileName": "get-locations-single.json",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
 }

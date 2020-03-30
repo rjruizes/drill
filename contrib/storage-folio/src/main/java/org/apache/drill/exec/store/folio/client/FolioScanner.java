@@ -1,7 +1,9 @@
 package org.apache.drill.exec.store.folio.client;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 // import java.util.List;
@@ -9,25 +11,35 @@ import java.util.Map;
 
 import com.github.jsonldjava.utils.JsonUtils;
 
-import org.apache.drill.exec.store.folio.Filter;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.utils.URIBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.z3950.zing.cql.CQLNode;
+
 public class FolioScanner {
+  static final Logger logger = LoggerFactory.getLogger(FolioScanner.class);
   private FolioClient client;
   private boolean hasMoreRows = true;
   // private List<String> projectedColumnNames;
   private String uri;
 
-  public FolioScanner(String path, FolioClient client, int maxRecords, Filter filters) throws URISyntaxException {
+  public FolioScanner(String path, FolioClient client, int maxRecords, CQLNode filters)
+      throws URISyntaxException, UnsupportedEncodingException {
     this.client = client;
     URIBuilder uriBuilder = client.getURI()
       .setPath(path.replaceAll("\\.", "/"))
       .addParameter("limit", String.valueOf(maxRecords));
     if(filters != null) {
-      uriBuilder.addParameter("query", filters.toCql());
+      String q = filters.toCQL();
+      uriBuilder.addParameter("query", q);
+      System.out.printf("query: %s\n", q);
     }
     this.uri = uriBuilder.build().toString();
+
+    System.out.printf("uri: %s\n", uri);
+    logger.info("uri", uri);
   }
 
   public boolean hasMoreRows() {

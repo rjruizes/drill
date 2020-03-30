@@ -1,5 +1,8 @@
 package org.apache.drill.exec.store.folio;
 
+import org.z3950.zing.cql.*;
+
+import org.apache.drill.common.expression.BooleanOperator;
 import org.apache.drill.common.expression.visitors.AbstractExprVisitor;
 import org.apache.drill.exec.store.folio.common.FolioCompareOp;
 import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableList;
@@ -12,10 +15,16 @@ import org.apache.drill.common.expression.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// FolioPushDownFilterForScan.java
+// -> parseTree
+//    - visitFunctionCall
+//      - createFolioScanSpec: defines the list of valid filter operations
+//      - mergeScanSpecs
+
 public class FolioFilterBuilder extends
     AbstractExprVisitor<FolioScanSpec, Void, RuntimeException> {
-      static final Logger logger = LoggerFactory
-      .getLogger(FolioFilterBuilder.class);
+
+  static final Logger logger = LoggerFactory.getLogger(FolioFilterBuilder.class);
   final FolioGroupScan groupScan;
   final LogicalExpression le;
   private boolean allExpressionsConverted = true;
@@ -37,14 +46,13 @@ public class FolioFilterBuilder extends
 
   private FolioScanSpec mergeScanSpecs(String functionName,
     FolioScanSpec leftScanSpec, FolioScanSpec rightScanSpec) {
-    Filter newFilter = new Filter();
+    CQLNode newFilter = null;
 
     switch (functionName) {
     case "booleanAnd":
       if (leftScanSpec.getFilters() != null
           && rightScanSpec.getFilters() != null) {
-        // newFilter = MongoUtils.andFilterAtIndex(leftScanSpec.getFilters(),
-        //     rightScanSpec.getFilters());
+        newFilter = new CQLAndNode(leftScanSpec.getFilters(), rightScanSpec.getFilters(), new ModifierSet("and"));
       } else if (leftScanSpec.getFilters() != null) {
         newFilter = leftScanSpec.getFilters();
       } else {
@@ -52,14 +60,26 @@ public class FolioFilterBuilder extends
       }
       break;
     case "booleanOr":
-      // newFilter = MongoUtils.orFilterAtIndex(leftScanSpec.getFilters(),
-          // rightScanSpec.getFilters());
+      if (leftScanSpec.getFilters() != null
+          && rightScanSpec.getFilters() != null) {
+        newFilter = new CQLOrNode(leftScanSpec.getFilters(), rightScanSpec.getFilters(), new ModifierSet("or"));
+      } else if (leftScanSpec.getFilters() != null) {
+        newFilter = leftScanSpec.getFilters();
+      } else {
+        newFilter = rightScanSpec.getFilters();
+      }
+      break;
     }
     return new FolioScanSpec(groupScan.getFolioScanSpec().getTableName(), newFilter);
   }
 
   public boolean isAllExpressionsConverted() {
     return allExpressionsConverted;
+  }
+
+  @Override
+  public FolioScanSpec visitBooleanOperator(BooleanOperator op, Void value) throws RuntimeException {
+    return visitFunctionCall(op, value);
   }
 
   @Override
@@ -77,7 +97,7 @@ public class FolioFilterBuilder extends
           nodeScanSpec = createFolioScanSpec(processor.getFunctionName(),
               processor.getPath(), processor.getValue());
         } catch (Exception e) {
-          logger.error(" Failed to creare Filter ", e);
+          logger.error(" Failed to create Filter ", e);
           // throw new RuntimeException(e.getMessage(), e);
         }
       }
@@ -133,31 +153,33 @@ public class FolioFilterBuilder extends
     case "less_than":
       compareOp = FolioCompareOp.LESS;
       break;
-    case "isnull":
-    case "isNull":
-    case "is null":
-      compareOp = FolioCompareOp.IFNULL;
-      break;
-    case "isnotnull":
-    case "isNotNull":
-    case "is not null":
-      compareOp = FolioCompareOp.IFNOTNULL;
-      break;
+    // case "isnull":
+    // case "isNull":
+    // case "is null":
+    //   compareOp = FolioCompareOp.IFNULL;
+    //   break;
+    // case "isnotnull":
+    // case "isNotNull":
+    // case "is not null":
+    //   compareOp = FolioCompareOp.IFNOTNULL;
+    //   break;
     }
 
     if (compareOp != null) {
-      Filter queryFilter = new Filter();
-      if (compareOp == FolioCompareOp.IFNULL) {
-        queryFilter.put(fieldName,
-            new Filter(FolioCompareOp.EQUAL.getCompareOp(), null));
-      } else if (compareOp == FolioCompareOp.IFNOTNULL) {
-        queryFilter.put(fieldName,
-            new Filter(FolioCompareOp.NOT_EQUAL.getCompareOp(), null));
-      } else {
-        queryFilter.put(fieldName, new Filter(compareOp.getCompareOp(),
-            fieldValue));
-      }
-      return new FolioScanSpec(groupScan.getFolioScanSpec().getTableName(), queryFilter); // queryFilter
+      // if (compareOp == FolioCompareOp.IFNULL) {
+      //   new CQLTermNode(fieldName, new CQLRelation("="), "");
+      //   queryFilter.put(fieldName,
+      //       new Filter(FolioCompareOp.EQUAL.getCompareOp(), null));
+      // } else if (compareOp == FolioCompareOp.IFNOTNULL) {
+      //   new CQLNotNode(left, right, ms);
+      //   queryFilter.put(fieldName,
+      //       new Filter(FolioCompareOp.NOT_EQUAL.getCompareOp(), null));
+      // } else {
+      //   queryFilter.put(fieldName, new Filter(compareOp.getCompareOp(),
+      //       fieldValue));
+      // }
+      CQLNode cql = new CQLTermNode(fieldName, new CQLRelation(compareOp.getCompareOp()), fieldValue.toString());
+      return new FolioScanSpec(groupScan.getFolioScanSpec().getTableName(), cql); // queryFilter
     }
     return null;
   }

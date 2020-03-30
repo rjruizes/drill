@@ -50,7 +50,7 @@ public class FolioClient {
     }
 
     public URIBuilder getURI() throws URISyntaxException {
-        return baseURI;
+        return new URIBuilder(baseURI.toString());
     }
 
     private HttpUriRequest authenticatedRequest(String method, String uri) {
